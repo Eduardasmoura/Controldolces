@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /painel
+Disallow: /ingredientes
+Disallow: /produtos
+Disallow: /precificar
+Disallow: /historico
+Disallow: /relatorios
+Disallow: /configuracoes
+Disallow: /onboarding
+
+Sitemap: /sitemap.xml
