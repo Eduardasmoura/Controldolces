@@ -9,8 +9,10 @@ import { supabaseEnv } from './env';
  * A sessão vive em cookies httpOnly — o token nunca é lido por JavaScript do cliente.
  */
 export async function createSupabaseServerClient() {
-  const { url, anonKey } = supabaseEnv();
+  // A leitura dos cookies vem primeiro de propósito: ela marca a rota como
+  // dinâmica, evitando que o build tente pré-renderizar páginas privadas.
   const cookieStore = await cookies();
+  const { url, anonKey } = supabaseEnv();
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {

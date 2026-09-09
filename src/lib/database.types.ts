@@ -182,6 +182,10 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       owned_business_ids: { Args: Record<string, never>; Returns: string[] };
+      save_product: {
+        Args: { p_product: Json; p_ingredients: Json; p_extras: Json };
+        Returns: string;
+      };
     };
     Enums: {
       measurement_unit: MeasurementUnit;
