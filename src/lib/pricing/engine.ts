@@ -25,7 +25,6 @@ import type {
   PricingInput,
   PricingIssue,
   PricingOutcome,
-  PricingResult,
   RecipeIngredientInput,
 } from './types';
 import { areCompatible, toBaseQuantity } from './units';
