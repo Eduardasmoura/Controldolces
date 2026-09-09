@@ -60,6 +60,7 @@ export default async function PricingPage({
         productId={detail.product.id}
         productName={detail.product.name}
         yieldLabel={detail.product.yield_label}
+        photoUrl={detail.product.photo_url}
         input={buildPricingInput(detail, settings)}
         savedSalePrice={salvo?.sale_price ?? null}
       />

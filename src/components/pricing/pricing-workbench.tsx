@@ -27,12 +27,14 @@ export function PricingWorkbench({
   productId,
   productName,
   yieldLabel,
+  photoUrl,
   input,
   savedSalePrice,
 }: {
   productId: string;
   productName: string;
   yieldLabel: string;
+  photoUrl: string | null;
   input: PricingInput;
   savedSalePrice: number | null;
 }) {
@@ -94,6 +96,7 @@ export function PricingWorkbench({
           <PricingResultView
             productName={productName}
             yieldLabel={yieldLabel}
+            photoUrl={photoUrl}
             result={result}
             salePrice={precoAtual}
           />

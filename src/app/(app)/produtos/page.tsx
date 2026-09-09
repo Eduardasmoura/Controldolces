@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { PageHeader } from '@/components/app/page-header';
+import { ProductPhoto } from '@/components/app/product-photo';
 import { DeleteForm } from '@/components/forms/delete-form';
 import { ButtonLink } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -63,6 +64,12 @@ export default async function ProductsPage() {
                   key={product.id}
                   className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:px-6"
                 >
+                  <ProductPhoto
+                    url={product.photo_url}
+                    name={product.name}
+                    className="h-11 w-11"
+                  />
+
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/precificar/${product.id}`}

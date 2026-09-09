@@ -1,3 +1,4 @@
+import { ProductPhoto } from '@/components/app/product-photo';
 import { Badge } from '@/components/ui/feedback';
 import { formatCurrency, formatMarkup, formatPercent } from '@/lib/format';
 import type { PricingResult } from '@/lib/pricing';
@@ -51,12 +52,14 @@ export function PricingResultView({
   yieldLabel,
   result,
   salePrice,
+  photoUrl = null,
 }: {
   productName: string;
   yieldLabel?: string;
   result: PricingResult;
   /** Preço realmente praticado. Quando ausente, usa o preço recomendado. */
   salePrice?: number;
+  photoUrl?: string | null;
 }) {
   const price = salePrice ?? result.recommendedPrice;
   const fees = price * (result.variableFeesPercent / 100);
@@ -67,12 +70,17 @@ export function PricingResultView({
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="font-display text-xl font-semibold text-sand-900">{productName}</h2>
-          <p className="text-sm text-sand-500">
-            Rende {result.yieldQuantity} {yieldLabel ?? 'unidades'}
-          </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <ProductPhoto url={photoUrl} name={productName} className="h-12 w-12" />
+          <div className="min-w-0">
+            <h2 className="truncate font-display text-xl font-semibold text-sand-900">
+              {productName}
+            </h2>
+            <p className="text-sm text-sand-500">
+              Rende {result.yieldQuantity} {yieldLabel ?? 'unidades'}
+            </p>
+          </div>
         </div>
         {belowMinimum ? (
           <Badge tone="danger">Abaixo do preço mínimo</Badge>
