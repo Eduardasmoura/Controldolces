@@ -55,6 +55,7 @@ export default async function EditProductPage({
           id: detail.product.id,
           name: detail.product.name,
           category: detail.product.category ?? '',
+          photoUrl: detail.product.photo_url ?? '',
           yieldQuantity: String(detail.product.yield_quantity),
           yieldLabel: detail.product.yield_label,
           laborMinutes: detail.product.labor_minutes ? String(detail.product.labor_minutes) : '',

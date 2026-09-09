@@ -121,6 +121,15 @@ export async function savePricingAction(_state: FormState, formData: FormData): 
 
   if (historyError) console.error('[controldolces] precificação: histórico', historyError);
 
+  // A margem escolhida passa a ser a do produto, para reabrir a tela do mesmo jeito.
+  const { error: marginError } = await supabase
+    .from('products')
+    .update({ margin_percent: parsed.data.marginPercent })
+    .eq('business_id', businessId)
+    .eq('id', detail.product.id);
+
+  if (marginError) console.error('[controldolces] precificação: margem do produto', marginError);
+
   revalidarTudo();
   return success('Precificação salva.');
 }

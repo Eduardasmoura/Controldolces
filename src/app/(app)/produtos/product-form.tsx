@@ -37,6 +37,7 @@ export type ProductFormValues = {
   id?: string;
   name: string;
   category: string;
+  photoUrl: string;
   yieldQuantity: string;
   yieldLabel: string;
   laborMinutes: string;
@@ -214,6 +215,8 @@ export function ProductForm({
   return (
     <form action={action} className="space-y-5" noValidate>
       {initial.id ? <input type="hidden" name="id" value={initial.id} /> : null}
+      {/* A margem é escolhida na tela de precificação; aqui ela apenas é preservada. */}
+      <input type="hidden" name="marginPercent" value={initial.marginPercent} />
       <input
         type="hidden"
         name="ingredients"
@@ -275,6 +278,7 @@ export function ProductForm({
               label="Foto (link)"
               name="photoUrl"
               type="url"
+              defaultValue={initial.photoUrl}
               placeholder="Opcional"
               hint="Cole o endereço de uma imagem, se quiser."
               error={state.fieldErrors?.photoUrl}

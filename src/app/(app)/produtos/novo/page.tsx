@@ -28,6 +28,7 @@ export default async function NewProductPage() {
         initial={{
           name: '',
           category: '',
+          photoUrl: '',
           yieldQuantity: '',
           yieldLabel: 'unidades',
           laborMinutes: '',

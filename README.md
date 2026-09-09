@@ -74,7 +74,8 @@ npm run dev
 | `npm run build` | Build de produção |
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run lint` | ESLint |
-| `npm test` | Testes do motor de precificação |
+| `npm test` | Testes do motor de precificação (49 testes) |
+| `npm run test:db` | Testes de isolamento e transação num Postgres temporário |
 
 ## Estrutura
 
@@ -102,7 +103,9 @@ src/
     queries.ts            leitura
     pricing.ts            ponte banco → motor
     context.ts            usuária, negócio e configurações da requisição
-supabase/migrations/      esquema, RLS e função transacional
+supabase/
+  migrations/           esquema, RLS e função transacional
+  tests/                isolamento entre contas, validado num Postgres real
 docs/                     arquitetura e regras de cálculo
 ```
 
@@ -132,3 +135,8 @@ acontece só na exibição. Detalhes e a dedução das fórmulas em
   financeiro vindo do navegador é aceito como verdade.
 - Recuperação de senha responde igual exista ou não a conta.
 - Nenhuma secret no cliente; erros técnicos ficam no log, não na tela.
+
+O isolamento não é uma promessa: `npm run test:db` sobe um PostgreSQL temporário,
+aplica as migrações e verifica que uma segunda conta não lê, não apaga e não grava
+nada da primeira — nem chamando o banco diretamente. Detalhes em
+[`supabase/tests/README.md`](supabase/tests/README.md).
