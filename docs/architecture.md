@@ -68,6 +68,25 @@ o JSONB preserva a entrada exata do cálculo.
 Assim uma precificação de três meses atrás continua explicável mesmo depois de os
 ingredientes mudarem de preço — e a política de `update` é removida de propósito.
 
+## Onboarding retomável
+
+`profiles.onboarding_step` guarda em que etapa a usuária parou, e cada etapa
+grava direto na tabela de destino (`profiles`, `businesses`) — não existe
+rascunho paralelo para depois copiar. Fechar o navegador, trocar de celular ou
+voltar no dia seguinte leva ao mesmo ponto, porque o estado está no banco e não
+no `localStorage`.
+
+O negócio nasce na etapa 2, junto com `cost_settings` e `subscriptions`. Quem
+abandona depois disso deixa um negócio com dados parciais — e é exatamente por
+isso que `requireContext()` exige `onboarding_completed_at` preenchido para
+liberar qualquer tela do app.
+
+## Painel sem número inventado
+
+`dashboard_summary()` conta no Postgres e devolve tudo numa ida só. As médias
+voltam `NULL` quando não há precificação salva, e a tela mostra "—": a diferença
+entre "não há dados" e "a média é zero" importa para quem está começando.
+
 ## Fluxo da usuária
 
 ```

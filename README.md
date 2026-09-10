@@ -39,6 +39,8 @@ as migrações **na ordem**:
 3. `supabase/migrations/0003_save_product.sql` — gravação transacional da receita
 4. `supabase/migrations/0004_fase1_alinhamento.sql` — custo por unidade-base,
    gás/energia do negócio e custo aberto por categoria nas precificações
+5. `supabase/migrations/0005_onboarding_etapas.sql` — estado do onboarding
+6. `supabase/migrations/0006_dashboard_summary.sql` — resumo do painel numa consulta
 
 Com a CLI do Supabase, `supabase db push` aplica todas.
 
@@ -89,7 +91,7 @@ src/
     (auth)/               entrar, criar conta, recuperar e trocar senha
     (app)/                painel, ingredientes, receitas, precificar,
                           histórico, relatórios, configurações
-    onboarding/           criação do negócio na primeira entrada
+    onboarding/           onboarding em 4 etapas, retomável
     auth/confirmar/       troca do token do e-mail pela sessão
   components/
     ui/                   botões, campos, cards, estados, ícones

@@ -85,11 +85,19 @@ export const resetPasswordSchema = z
 // ---------------------------------------------------------------------------
 // Onboarding e negócio
 // ---------------------------------------------------------------------------
-export const onboardingSchema = z.object({
+/** Etapa 2 — quem é você e como se chama o seu negócio. */
+export const onboardingSobreVoceSchema = z.object({
   fullName: z.string().trim().min(2, 'Informe o seu nome.').max(120),
   businessName: z.string().trim().min(2, 'Informe o nome da sua confeitaria.').max(120),
+});
+
+/** Etapa 3 — tipo de negócio. Nunca obrigatório: ninguém fica preso aqui. */
+export const onboardingTipoSchema = z.object({
   businessType: z.string().trim().max(60).optional().or(z.literal('')),
-  productVolume: z.string().trim().max(60).optional().or(z.literal('')),
+});
+
+/** Etapa 4 — o que ela mais quer melhorar. */
+export const onboardingObjetivoSchema = z.object({
   mainGoal: z.string().trim().max(120).optional().or(z.literal('')),
 });
 

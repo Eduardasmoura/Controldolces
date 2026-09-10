@@ -18,7 +18,16 @@ export const NAV_ITEMS = [
   { href: '/configuracoes', label: 'Configurações', short: 'Ajustes', Icon: IconSettings },
 ] as const;
 
-/** No celular a barra inferior mostra só o essencial; o resto vive no menu. */
-export const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) =>
-  ['/painel', '/ingredientes', '/produtos', '/precificar'].includes(item.href),
+/**
+ * Barra inferior do celular.
+ *
+ * Não é a lateral encolhida: são as quatro ações que uma confeiteira abre no dia
+ * a dia, na ordem em que ela pensa — ver o painel, precificar, cuidar dos
+ * insumos, cuidar das receitas. Histórico, relatórios e configurações vivem no
+ * menu da conta, porque são consulta, não rotina.
+ */
+const ORDEM_MOBILE = ['/painel', '/precificar', '/ingredientes', '/produtos'] as const;
+
+export const MOBILE_NAV_ITEMS = ORDEM_MOBILE.map(
+  (href) => NAV_ITEMS.find((item) => item.href === href)!,
 );

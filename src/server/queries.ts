@@ -252,3 +252,81 @@ export const getSubscription = cache(async (businessId: string): Promise<Subscri
 
   return data ?? null;
 });
+
+export type DashboardSummary = {
+  ingredientsCount: number;
+  productsCount: number;
+  pricingsCount: number;
+  /** Nulos quando ainda não há precificação salva — a tela mostra "—", nunca zero inventado. */
+  averageMargin: number | null;
+  averageUnitCost: number | null;
+  potentialProfit: number | null;
+  lowMarginCount: number;
+  belowMinimumCount: number;
+};
+
+/**
+ * Resumo do painel numa única ida ao banco.
+ *
+ * Conta no Postgres em vez de trazer as linhas para contar em JavaScript.
+ * Devolve `null` — e não zero — nas médias quando não há precificação: a
+ * diferença entre "não há dados" e "a média é zero" importa na tela.
+ */
+export const getDashboardSummary = cache(async (): Promise<DashboardSummary> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('dashboard_summary');
+
+  if (error) {
+    console.error('[controldolces] dashboard_summary', error);
+    throw new Error('FALHA_RESUMO_PAINEL');
+  }
+
+  const linha = Array.isArray(data) ? data[0] : undefined;
+
+  return {
+    ingredientsCount: num(linha?.ingredients_count),
+    productsCount: num(linha?.products_count),
+    pricingsCount: num(linha?.pricings_count),
+    averageMargin: linha?.average_margin == null ? null : num(linha.average_margin),
+    averageUnitCost: linha?.average_unit_cost == null ? null : num(linha.average_unit_cost),
+    potentialProfit: linha?.potential_profit == null ? null : num(linha.potential_profit),
+    lowMarginCount: num(linha?.low_margin_count),
+    belowMinimumCount: num(linha?.below_minimum_count),
+  };
+});
+
+/** As precificações mais recentes, com o nome do produto. Só o que o painel exibe. */
+export const listRecentPricings = cache(
+  async (businessId: string, limit = 5): Promise<SavedPricing[]> => {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from('pricing_calculations')
+      .select('*')
+      .eq('business_id', businessId)
+      .order('updated_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[controldolces] listRecentPricings', error);
+      throw new Error('FALHA_PRECIFICACOES_RECENTES');
+    }
+
+    const linhas = data ?? [];
+    if (linhas.length === 0) return [];
+
+    // Busca só os produtos que aparecem na lista, não o catálogo inteiro.
+    const { data: produtos } = await supabase
+      .from('products')
+      .select('*')
+      .eq('business_id', businessId)
+      .in('id', linhas.map((linha) => linha.product_id));
+
+    const porId = new Map((produtos ?? []).map((produto) => [produto.id, normalizeProduct(produto)]));
+
+    return linhas.map((linha) => ({
+      ...linha,
+      ...normalizePricingNumbers(linha),
+      product: porId.get(linha.product_id) ?? null,
+    }));
+  },
+);

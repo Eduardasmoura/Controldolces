@@ -10,7 +10,7 @@ import { signOutAction } from '@/server/actions/auth';
 import { NAV_ITEMS } from './nav-items';
 
 /** Menu da conta. No celular também dá acesso às seções que não cabem na barra inferior. */
-export function AccountMenu({ name, email }: { name: string; email: string }) {
+export function AccountMenu({ name, businessName }: { name: string; businessName: string }) {
   const [open, setOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
 
@@ -62,8 +62,8 @@ export function AccountMenu({ name, email }: { name: string; email: string }) {
           )}
         >
           <div className="border-b border-sand-100 px-4 py-3">
-            <p className="truncate text-sm font-medium text-sand-800">{name}</p>
-            <p className="truncate text-xs text-sand-500">{email}</p>
+            <p className="truncate text-sm font-medium text-content-strong">{name}</p>
+            <p className="truncate text-xs text-content-subtle">{businessName}</p>
           </div>
 
           <div className="p-1.5 lg:hidden">

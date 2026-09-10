@@ -19,6 +19,8 @@ type Timestamps = { created_at: string; updated_at: string };
 export type ProfileRow = Timestamps & {
   id: string;
   full_name: string;
+  /** Próxima etapa do onboarding: 0 boas-vindas … 4 tudo pronto. */
+  onboarding_step: number;
   onboarding_completed_at: string | null;
 };
 
@@ -216,6 +218,19 @@ export type Database = {
     Functions: {
       owned_business_ids: { Args: Record<string, never>; Returns: string[] };
       unit_base_factor: { Args: { u: MeasurementUnit }; Returns: number };
+      dashboard_summary: {
+        Args: Record<string, never>;
+        Returns: {
+          ingredients_count: number;
+          products_count: number;
+          pricings_count: number;
+          average_margin: number | null;
+          average_unit_cost: number | null;
+          potential_profit: number | null;
+          low_margin_count: number;
+          below_minimum_count: number;
+        }[];
+      };
       save_product: {
         Args: { p_product: Json; p_ingredients: Json; p_extras: Json };
         Returns: string;

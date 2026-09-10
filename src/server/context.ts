@@ -101,10 +101,14 @@ export const getCostSettings = cache(async (businessId: string): Promise<CostSet
  */
 export async function requireContext(): Promise<AppContext> {
   const user = await requireUser();
-  const business = await getBusiness();
-  if (!business) redirect('/onboarding');
+  const [business, profile] = await Promise.all([getBusiness(), getProfile()]);
 
-  const [profile, settings] = await Promise.all([getProfile(), getCostSettings(business.id)]);
+  // Sem negócio, ou com o onboarding pela metade, a usuária volta para lá. É o
+  // que garante que nenhuma tela do app apareça sem os dados mínimos — e o que
+  // permite gravar respostas parciais durante o onboarding sem abrir o app.
+  if (!business || !profile?.onboarding_completed_at) redirect('/onboarding');
+
+  const settings = await getCostSettings(business.id);
 
   return { user, profile, business, settings };
 }

@@ -15,20 +15,20 @@ export default function AppError({ error, reset }: { error: Error; reset: () => 
   return (
     <Card>
       <CardBody className="space-y-4 py-10 text-center">
-        <h1 className="font-display text-2xl font-semibold text-sand-900">
-          Algo não carregou como devia
+        <h1 className="font-display text-2xl font-bold text-content-strong">
+          Não conseguimos carregar seus dados agora
         </h1>
-        <p className="mx-auto max-w-md leading-relaxed text-sand-600">
-          Seus dados estão salvos. Tente abrir a tela de novo — se continuar assim, volte ao painel e
-          siga por outro caminho.
+        <p className="mx-auto max-w-md leading-relaxed text-content-muted">
+          Seus dados estão salvos — o problema foi ao buscá-los. Tente novamente; se continuar
+          assim, volte ao painel e siga por outro caminho.
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button type="button" onClick={reset}>
-            Tentar de novo
+            Tentar novamente
           </Button>
           <Link
             href="/painel"
-            className="inline-flex h-11 items-center rounded-xl border border-sand-200 bg-white px-4 text-sand-700 hover:border-sand-300"
+            className="inline-flex h-11 items-center rounded-xl border border-surface-border bg-surface px-4 text-content hover:border-content-subtle/40"
           >
             Ir para o painel
           </Link>

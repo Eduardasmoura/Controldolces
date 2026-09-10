@@ -6,7 +6,7 @@ import { Logo } from '@/components/ui/logo';
 import { requireContext } from '@/server/context';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile, business } = await requireContext();
+  const { profile, business } = await requireContext();
   const name = profile?.full_name?.trim() || business.name;
 
   return (
@@ -38,7 +38,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Logo compact />
             </Link>
             <p className="hidden truncate text-sm text-sand-500 lg:block">{business.name}</p>
-            <AccountMenu name={name} email={user.email ?? ''} />
+            <AccountMenu name={name} businessName={business.name} />
           </div>
         </header>
 
