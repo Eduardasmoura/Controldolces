@@ -1,140 +1,201 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { HeroPreview } from '@/components/marketing/hero-preview';
+import {
+  CostsScreen,
+  IngredientsScreen,
+  PricingScreen,
+  RecipeScreen,
+  brownieDemoResult,
+} from '@/components/marketing/app-mockup';
+import { AudienceCard, BenefitCard, FeatureCard, StepCard } from '@/components/marketing/cards';
+import { CallToAction } from '@/components/marketing/cta';
+import { Faq, type FaqItem } from '@/components/marketing/faq';
+import { PricingResult } from '@/components/marketing/pricing-result';
+import { Reveal } from '@/components/marketing/reveal';
+import { Section, SectionTitle } from '@/components/marketing/section';
 import { ButtonLink } from '@/components/ui/button';
-import { IconArrowRight, IconCheck } from '@/components/ui/icons';
+import {
+  IconArrowRight,
+  IconCheck,
+  IconHistory,
+  IconIngredients,
+  IconPrice,
+  IconRecipe,
+  IconReports,
+  IconSettings,
+} from '@/components/ui/icons';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
 const DORES = [
-  'Será que estou cobrando certo por esse bolo?',
-  'Quanto eu realmente gasto para fazer uma fornada?',
-  'Estou tendo lucro ou só devolvendo o dinheiro dos ingredientes?',
-  'Como é que se calcula o gás e a energia de uma receita?',
-  'Quanto eu deveria cobrar pelas minhas horas de trabalho?',
-  'Meu preço está barato demais e eu nem sei?',
+  'Somo os ingredientes e paro por aí.',
+  'Esqueço da caixa, da fita e da forminha.',
+  'Nunca coloquei meu tempo de trabalho na conta.',
+  'Não faço ideia de quanto o gás e a energia pesam.',
+  'Olho o preço da concorrente e chuto por perto.',
+  'Trabalho o mês inteiro e não sei se sobrou alguma coisa.',
 ];
 
 const ETAPAS = [
   {
     numero: '01',
     titulo: 'Cadastre seus ingredientes',
-    texto:
-      'Informe o que você paga e a quantidade da embalagem. O sistema descobre sozinho quanto custa cada grama, mililitro ou unidade.',
+    descricao:
+      'Informe o tamanho da embalagem e quanto pagou. O sistema descobre quanto custa cada grama.',
   },
   {
     numero: '02',
-    titulo: 'Monte a ficha técnica',
-    texto:
-      'Diga quanto de cada ingrediente entra na receita e quantas unidades ela rende. O custo do lote aparece na hora.',
+    titulo: 'Monte sua receita',
+    descricao:
+      'Diga quanto de cada ingrediente entra e quantas unidades a receita rende.',
   },
   {
     numero: '03',
-    titulo: 'Some os custos que ninguém conta',
-    texto:
-      'Embalagem, mão de obra, gás, energia, transporte, etiquetas. Tudo o que sai do seu bolso entra na conta.',
+    titulo: 'Adicione seus custos',
+    descricao:
+      'Embalagem, mão de obra, gás e energia. Tudo o que sai do seu bolso entra na conta.',
   },
   {
     numero: '04',
-    titulo: 'Descubra o seu preço',
-    texto:
-      'Escolha a margem que você quer e veja o preço mínimo, o preço recomendado, o lucro por unidade e o markup.',
+    titulo: 'Descubra quanto cobrar',
+    descricao:
+      'Escolha sua margem e veja o custo, o preço mínimo e o preço sugerido de cada unidade.',
   },
 ];
 
-const RECURSOS = [
+const FUNCIONALIDADES = [
   {
-    titulo: 'Ingredientes com custo por medida',
-    texto: 'Comprou 1 kg por R$ 29,90? A receita usa 150 g? O sistema resolve a regra de três.',
+    icone: <IconIngredients className="h-5 w-5" />,
+    titulo: 'Ingredientes',
+    descricao:
+      'Cadastre seus ingredientes e saiba quanto cada grama, ml ou unidade realmente custa.',
   },
   {
-    titulo: 'Ficha técnica por produto',
-    texto: 'Rendimento, ingredientes, quantidades e observações num lugar só.',
+    icone: <IconRecipe className="h-5 w-5" />,
+    titulo: 'Ficha técnica',
+    descricao: 'Monte suas receitas informando ingredientes, quantidades e rendimento.',
   },
   {
-    titulo: 'Mão de obra por hora',
-    texto: 'Defina quanto vale a sua hora e o tempo de produção. Seu trabalho vira custo, não caridade.',
+    icone: <IconSettings className="h-5 w-5" />,
+    titulo: 'Custos',
+    descricao: 'Considere embalagem, mão de obra, gás, energia e outros custos da produção.',
   },
   {
-    titulo: 'Gás, energia e embalagem',
-    texto: 'Custos por lote ou por unidade, cada um no seu lugar certo.',
+    icone: <IconPrice className="h-5 w-5" />,
+    titulo: 'Precificação',
+    descricao: 'Descubra custo, preço mínimo, preço recomendado, margem e lucro por unidade.',
   },
   {
-    titulo: 'Custos indiretos sem contabilidade',
-    texto: 'Aluguel, internet, manutenção: rateio simples, opcional, e explicado em português.',
+    icone: <IconReports className="h-5 w-5" />,
+    titulo: 'Simulação',
+    descricao: 'Teste diferentes preços antes de decidir quanto cobrar pelo seu produto.',
   },
   {
-    titulo: 'Margem e markup separados',
-    texto: 'Duas coisas diferentes, mostradas como coisas diferentes. Sem confusão que custa dinheiro.',
-  },
-  {
-    titulo: 'Preço mínimo e preço recomendado',
-    texto: 'Um diz onde você empata. O outro, onde você lucra o quanto decidiu lucrar.',
-  },
-  {
-    titulo: 'Simulador em tempo real',
-    texto: 'Mexa no preço e veja lucro, margem e markup mudando enquanto você digita.',
-  },
-  {
-    titulo: 'Histórico e relatórios',
-    texto: 'Todas as precificações salvas, com os produtos mais rentáveis e os de margem apertada.',
+    icone: <IconHistory className="h-5 w-5" />,
+    titulo: 'Histórico',
+    descricao: 'Tenha suas precificações organizadas para consultar quando quiser.',
   },
 ];
 
-const PERGUNTAS = [
+const BENEFICIOS = [
   {
-    pergunta: 'Preciso entender de finanças para usar?',
-    resposta:
-      'Não. Você informa o que compra, o que usa e quanto quer ganhar. As fórmulas ficam com o sistema, e cada resultado vem com uma explicação em linguagem comum.',
+    titulo: 'Mais segurança para cobrar',
+    descricao:
+      'Você deixa de depender do “acho que esse preço está bom” e passa a ter um número para defender.',
   },
   {
-    pergunta: 'Qual a diferença entre margem e markup?',
-    resposta:
-      'Margem é quanto sobra de cada real vendido: lucro dividido pelo preço. Markup é quantas vezes o custo o preço representa: preço dividido pelo custo. Um doce que custa R$ 5,00 e é vendido por R$ 10,00 tem 50% de margem e markup de 2,00x. Tratar os dois como sinônimo é o erro que mais aperta a margem de quem vende doce.',
+    titulo: 'Mais clareza sobre seu lucro',
+    descricao: 'Entenda quanto realmente sobra depois que todos os custos são pagos.',
   },
   {
-    pergunta: 'Dá para usar pelo celular?',
-    resposta:
-      'Sim. O ControlDolces foi desenhado primeiro para a tela do celular, porque é lá que a maioria das confeiteiras faz as contas, muitas vezes com a cozinha em plena produção.',
+    titulo: 'Mais organização',
+    descricao: 'Suas receitas, seus custos e seus preços em um lugar só, sempre à mão.',
   },
   {
-    pergunta: 'E os custos que eu não sei calcular, como gás e energia?',
-    resposta:
-      'Você lança uma estimativa por lote — e pode ajustar quando quiser. É melhor considerar um valor aproximado do que fingir que esse custo não existe.',
+    titulo: 'Decisões melhores',
+    descricao: 'Simule preços antes de anunciar e veja o efeito de cada mudança no seu bolso.',
+  },
+];
+
+const PUBLICO = [
+  { titulo: 'Confeiteiras', descricao: 'Doces variados, muitas receitas, muitos custos diferentes.' },
+  { titulo: 'Boleiras', descricao: 'Bolos por encomenda, cada um com um tamanho e um recheio.' },
+  { titulo: 'Docerias', descricao: 'Vitrine com dezenas de itens e uma tabela de preços para manter.' },
+  { titulo: 'Quem trabalha por encomenda', descricao: 'Orçamento na hora, com o custo já calculado.' },
+  { titulo: 'Quem está começando', descricao: 'O primeiro preço, feito do jeito certo desde o início.' },
+  { titulo: 'Pequenos negócios', descricao: 'Brownies, cookies, tortas, salgados: a conta é a mesma.' },
+];
+
+const PERGUNTAS: FaqItem[] = [
+  {
+    question: 'Preciso entender de matemática?',
+    answer:
+      'Não. Você informa o que compra, o que usa e quanto quer ganhar. O sistema faz os cálculos e mostra o resultado em português, sem fórmula na tela.',
   },
   {
-    pergunta: 'Meus dados ficam visíveis para outras pessoas?',
-    resposta:
-      'Não. Cada conta enxerga somente os próprios ingredientes, receitas e precificações. O isolamento é aplicado no próprio banco de dados, não apenas na tela.',
+    question: 'Posso cadastrar meus próprios ingredientes?',
+    answer:
+      'Sim. Você cadastra cada ingrediente com o tamanho da embalagem e o valor que pagou, e pode atualizar o preço sempre que ele mudar.',
+  },
+  {
+    question: 'Posso considerar embalagem e mão de obra?',
+    answer:
+      'Sim. Além dos ingredientes, você lança embalagem, seu tempo de trabalho, gás, energia e outros custos como transporte ou etiquetas.',
+  },
+  {
+    question: 'Posso alterar o preço depois?',
+    answer:
+      'Sim. O simulador permite testar preços diferentes e ver na hora o efeito no lucro, na margem e no markup, antes de decidir.',
+  },
+  {
+    question: 'Posso usar pelo celular?',
+    answer:
+      'Sim. A interface foi desenhada primeiro para a tela do celular, porque é lá que a maioria das contas acaba sendo feita.',
+  },
+  {
+    question: 'O sistema serve somente para bolos?',
+    answer:
+      'Não. Serve para qualquer produto com receita e rendimento: brownies, brigadeiros, cookies, tortas, panetones, salgados.',
+  },
+  {
+    question: 'Qual a diferença entre margem e markup?',
+    answer:
+      'Margem é quanto sobra de cada real vendido: lucro dividido pelo preço. Markup é quantas vezes o custo o preço representa. Um doce que custa R$ 5,00 e é vendido por R$ 10,00 tem 50% de margem e markup de 2,00x. O sistema mostra os dois separados, porque tratá-los como sinônimo aperta a margem sem você perceber.',
+  },
+  {
+    question: 'Meus dados ficam visíveis para outras pessoas?',
+    answer:
+      'Não. Cada conta enxerga somente os próprios ingredientes, receitas e precificações. O isolamento é aplicado no banco de dados, não apenas na tela.',
   },
 ];
 
 export default function LandingPage() {
+  const resultado = brownieDemoResult;
+
   return (
     <>
-      {/* HERO */}
+      {/* ---------------------------------------------------------------- HERO */}
       <section className="relative overflow-hidden">
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-gradient-to-b from-rose-50 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-gradient-to-b from-primary-soft/70 to-transparent"
           aria-hidden="true"
         />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl gap-y-10 px-5 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-x-16">
           <div>
-            <p className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-medium text-rose-700">
-              Feito para confeitarias e docerias artesanais
+            <p className="inline-flex items-center rounded-full border border-primary/20 bg-surface px-3 py-1 text-xs font-semibold text-primary-hover">
+              Feito para quem vive de fazer doce
             </p>
 
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-sand-900 sm:text-5xl">
-              Descubra quanto cobrar pelos seus doces sem depender do achismo.
+            <h1 className="mt-5 text-balance font-display text-[2.5rem] font-extrabold leading-[1.08] tracking-display-tight text-content-strong sm:text-5xl lg:text-[3.5rem]">
+              Pare de colocar preço no achismo
             </h1>
 
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-sand-600">
-              O ControlDolces calcula o custo real de cada receita — ingredientes, embalagem, mão de
-              obra, gás e energia — e mostra o preço mínimo, o preço recomendado e o lucro que sobra
-              em cada unidade.
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-content-muted">
+              Calcule o custo dos seus produtos, descubra seu lucro e saiba quanto cobrar pelos seus
+              doces de forma simples.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -147,161 +208,240 @@ export default function LandingPage() {
               </ButtonLink>
             </div>
 
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-sand-500">
-              {['Cálculo transparente', 'Funciona no celular', 'Seus dados só seus'].map((item) => (
-                <li key={item} className="flex items-center gap-1.5">
-                  <IconCheck className="h-4 w-4 text-rose-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <HeroPreview />
-        </div>
-      </section>
+          {/* No celular a prova visual vem logo depois dos botões; a lista de
+              garantias desce para baixo dela. */}
+          <figure className="m-0">
+            <PricingScreen />
+            <figcaption className="mt-3 text-center text-xs text-content-subtle">
+              Uma receita de brownie de verdade, calculada pelo motor do ControlDolces.
+            </figcaption>
+          </figure>
 
-      {/* PROBLEMA */}
-      <section id="problema" className="scroll-mt-20 border-y border-sand-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="max-w-2xl">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-sand-900 sm:text-4xl">
-              A conta que quase ninguém faz direito
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-sand-600">
-              A maioria dos pequenos negócios de doce calcula o preço somando os ingredientes e
-              acrescentando um valor que “parece justo”. O problema é o que fica de fora dessa conta.
-            </p>
-          </div>
-
-          <ul className="mt-10 grid gap-3 sm:grid-cols-2">
-            {DORES.map((dor) => (
-              <li
-                key={dor}
-                className="rounded-2xl border border-sand-200 bg-cream px-5 py-4 text-sand-700"
-              >
-                <span className="font-display text-lg leading-snug">“{dor}”</span>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-content-muted lg:col-span-2">
+            {['Cálculo transparente', 'Funciona no celular', 'Seus dados só seus'].map((item) => (
+              <li key={item} className="flex items-center gap-1.5">
+                <IconCheck className="h-4 w-4 text-primary" />
+                {item}
               </li>
             ))}
           </ul>
-
-          <div className="mt-10 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-6">
-            <p className="text-lg leading-relaxed text-amber-800">
-              Quando a embalagem, o gás e as suas horas de trabalho não entram na conta, o lucro que
-              aparece no papel simplesmente não existe no caixa. É por isso que dá para vender muito
-              e, mesmo assim, não sobrar dinheiro no fim do mês.
-            </p>
-          </div>
         </div>
       </section>
 
-      {/* COMO FUNCIONA */}
-      <section id="como-funciona" className="scroll-mt-20">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="max-w-2xl">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-sand-900 sm:text-4xl">
-              Quatro passos até o seu preço
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-sand-600">
-              Você cadastra uma vez e usa em todas as receitas. Da segunda precificação em diante, são
-              poucos minutos.
-            </p>
-          </div>
+      {/* ------------------------------------------------------------- A DOR */}
+      <Section id="problema" tone="surface">
+        <SectionTitle
+          eyebrow="O problema"
+          title="Você sabe quanto realmente custa cada doce?"
+          description="A conta que a maioria faz para na metade do caminho. É por isso que dá para vender muito e não sobrar dinheiro no fim do mês."
+        />
 
-          <ol className="mt-10 grid gap-4 md:grid-cols-2">
-            {ETAPAS.map((etapa) => (
-              <li key={etapa.numero} className="rounded-2xl border border-sand-200 bg-white p-6 shadow-card">
-                <span className="font-display text-sm font-semibold text-rose-500">{etapa.numero}</span>
-                <h3 className="mt-2 font-display text-xl font-semibold text-sand-900">{etapa.titulo}</h3>
-                <p className="mt-2 leading-relaxed text-sand-600">{etapa.texto}</p>
+        <ul className="mt-10 grid gap-3 sm:grid-cols-2">
+          {DORES.map((dor, indice) => (
+            <Reveal key={dor} delay={indice * 60}>
+              <li className="h-full rounded-2xl border border-surface-border bg-background px-5 py-4">
+                <p className="font-display text-lg leading-snug text-content">“{dor}”</p>
               </li>
-            ))}
-          </ol>
+            </Reveal>
+          ))}
+        </ul>
+      </Section>
 
-          <div className="mt-8">
-            <Link
-              href="/como-funciona"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-rose-700 hover:text-rose-800"
-            >
-              Ver o guia completo de precificação
-              <IconArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+      {/* ------------------------------------------------- VIRADA PARA A SOLUÇÃO */}
+      <Section tone="soft">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-balance font-display text-2xl font-bold leading-snug tracking-display-tight text-content-strong sm:text-3xl">
+            Seu preço deveria começar pelo seu custo, não pelo preço do concorrente.
+          </p>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-content-muted">
+            O ControlDolces reúne o que você gasta de verdade — ingredientes, embalagem, seu tempo,
+            gás e energia — e transforma isso num preço que faz sentido para o seu negócio. A
+            concorrente pode estar errando o preço dela; você não precisa errar junto.
+          </p>
         </div>
-      </section>
+      </Section>
 
-      {/* RECURSOS */}
-      <section id="recursos" className="scroll-mt-20 border-y border-sand-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="max-w-2xl">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-sand-900 sm:text-4xl">
-              Tudo o que entra no preço, em um lugar só
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-sand-600">
-              Um sistema pequeno e direto, feito para responder uma pergunta com precisão: quanto
-              cobrar.
-            </p>
-          </div>
+      {/* ----------------------------------------------------- COMO FUNCIONA */}
+      <Section id="como-funciona">
+        <SectionTitle
+          eyebrow="Como funciona"
+          title="Quatro passos até o seu preço"
+          description="Você cadastra uma vez e usa em todas as receitas. Da segunda precificação em diante, são poucos minutos."
+        />
 
-          <div className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {RECURSOS.map((recurso) => (
-              <div key={recurso.titulo} className="border-t border-sand-200 pt-5">
-                <h3 className="font-semibold text-sand-900">{recurso.titulo}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-sand-600">{recurso.texto}</p>
-              </div>
-            ))}
-          </div>
+        <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {ETAPAS.map((etapa, indice) => (
+            <Reveal key={etapa.numero} delay={indice * 70} className="h-full">
+              <StepCard
+                number={etapa.numero}
+                title={etapa.titulo}
+                description={etapa.descricao}
+              />
+            </Reveal>
+          ))}
+        </ol>
+      </Section>
+
+      {/* ------------------------------------------------------ DEMONSTRAÇÃO */}
+      <Section tone="surface">
+        <SectionTitle
+          eyebrow="Demonstração"
+          title="Do ingrediente ao preço de venda"
+          description="As mesmas telas que você vai usar, com os números de uma receita real de brownie que rende 16 unidades."
+        />
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          <Reveal>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-content-subtle">
+                1. O que cada ingrediente custa
+              </p>
+              <IngredientsScreen />
+            </div>
+          </Reveal>
+
+          <Reveal delay={80}>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-content-subtle">
+                2. Quanto entra na receita
+              </p>
+              <RecipeScreen />
+            </div>
+          </Reveal>
+
+          <Reveal delay={160}>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-content-subtle">
+                3. O que mais sai do seu bolso
+              </p>
+              <CostsScreen />
+            </div>
+          </Reveal>
+
+          <Reveal delay={240}>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-content-subtle">4. Quanto cobrar</p>
+              <PricingScreen compact />
+            </div>
+          </Reveal>
         </div>
-      </section>
+      </Section>
 
-      {/* PERGUNTAS */}
-      <section id="perguntas" className="scroll-mt-20">
-        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-sand-900 sm:text-4xl">
-            Perguntas frequentes
+      {/* ------------------------------------------------ RESULTADO DA PRECIFICAÇÃO */}
+      <Section>
+        <SectionTitle
+          eyebrow="O resultado"
+          title="Seus custos viram números que você entende"
+          description="No fim da conta, o que aparece não é uma planilha: são cinco informações que respondem quanto cobrar e quanto você ganha com isso."
+        />
+
+        <Reveal className="mt-10">
+          <PricingResult result={resultado} productName="Brownie · rende 16 unidades" />
+        </Reveal>
+
+        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-content-subtle">
+          O preço mínimo acompanha a margem de segurança que você configurar. Neste exemplo ela está
+          em 40%: abaixo de {' '}
+          <span className="font-medium text-content-muted">R$ 8,00</span> a venda deixa de compensar.
+        </p>
+      </Section>
+
+      {/* ----------------------------------------------------- FUNCIONALIDADES */}
+      <Section id="funcionalidades" tone="surface">
+        <SectionTitle
+          eyebrow="Funcionalidades"
+          title="Tudo o que entra no preço, em um lugar só"
+          description="Um sistema pequeno e direto, feito para responder uma pergunta com precisão: quanto cobrar."
+        />
+
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FUNCIONALIDADES.map((item, indice) => (
+            <Reveal key={item.titulo} delay={indice * 60} className="h-full">
+              <FeatureCard icon={item.icone} title={item.titulo} description={item.descricao} />
+            </Reveal>
+          ))}
+        </ul>
+      </Section>
+
+      {/* ---------------------------------------------------------- BENEFÍCIOS */}
+      <Section id="beneficios">
+        <SectionTitle
+          eyebrow="Benefícios"
+          title="O que muda no seu dia a dia"
+          description="Não é sobre ter mais um sistema. É sobre parar de ter dúvida na hora de dizer o preço."
+        />
+
+        <ul className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2">
+          {BENEFICIOS.map((beneficio, indice) => (
+            <Reveal key={beneficio.titulo} delay={indice * 60} className="h-full">
+              <BenefitCard title={beneficio.titulo} description={beneficio.descricao} />
+            </Reveal>
+          ))}
+        </ul>
+      </Section>
+
+      {/* ------------------------------------------------------------ PÚBLICO */}
+      <Section tone="surface">
+        <SectionTitle
+          eyebrow="Para quem é"
+          title="Se você faz doce para vender, é para você"
+          description="A conta não muda com o tipo de produto: o que muda é a receita, e isso quem informa é você."
+        />
+
+        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {PUBLICO.map((perfil, indice) => (
+            <Reveal key={perfil.titulo} delay={indice * 50} className="h-full">
+              <AudienceCard title={perfil.titulo} description={perfil.descricao} />
+            </Reveal>
+          ))}
+        </ul>
+      </Section>
+
+      {/* ------------------------------------------- COMECE PELO PRIMEIRO PRODUTO */}
+      <Section tone="soft">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-balance font-display text-3xl font-bold tracking-display-tight text-content-strong sm:text-4xl">
+            Seu próximo preço pode ser calculado, não chutado.
           </h2>
-
-          <div className="mt-8 divide-y divide-sand-200 border-y border-sand-200">
-            {PERGUNTAS.map((item) => (
-              <details key={item.pergunta} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-sand-900 marker:hidden">
-                  {item.pergunta}
-                  <span
-                    className="shrink-0 text-sand-400 transition-transform group-open:rotate-45"
-                    aria-hidden="true"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 leading-relaxed text-sand-600">{item.resposta}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA FINAL */}
-      <section className="border-t border-sand-200 bg-rose-600">
-        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Pare de cobrar no achismo
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-rose-100">
-            Crie sua conta e faça a primeira precificação hoje. Comece com um produto — normalmente é
-            o suficiente para a ficha cair.
+          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-content-muted">
+            Comece por um produto só — normalmente é o suficiente para a ficha cair.
           </p>
           <div className="mt-8 flex justify-center">
-            <ButtonLink
-              href="/criar-conta"
-              size="lg"
-              className="bg-white text-rose-700 hover:bg-rose-50 active:bg-rose-100"
-            >
-              Criar minha conta
+            <ButtonLink href="/criar-conta" size="lg">
+              Começar agora
               <IconArrowRight />
             </ButtonLink>
           </div>
         </div>
-      </section>
+      </Section>
+
+      {/* ---------------------------------------------------------------- FAQ */}
+      <Section id="faq">
+        <div className="mx-auto max-w-3xl">
+          <SectionTitle eyebrow="Dúvidas" title="Perguntas frequentes" />
+          <div className="mt-8">
+            <Faq items={PERGUNTAS} />
+          </div>
+          <p className="mt-6 text-sm text-content-subtle">
+            Não achou sua dúvida?{' '}
+            <Link href="/suporte" className="font-medium text-primary hover:text-primary-hover">
+              Veja a página de suporte
+            </Link>
+            .
+          </p>
+        </div>
+      </Section>
+
+      {/* ----------------------------------------------------------- CTA FINAL */}
+      <Section>
+        <CallToAction
+          title="Comece a precificar seus produtos com mais segurança."
+          description="Cadastre-se e faça sua primeira precificação."
+          note="Leva poucos minutos e você pode começar com um único produto."
+        />
+      </Section>
     </>
   );
 }

@@ -67,8 +67,8 @@ export default function OpenGraphImage() {
 
         <div style={{ display: 'flex', gap: '16px' }}>
           {[
-            ['Custo por unidade', 'R$ 2,45'],
-            ['Preço recomendado', 'R$ 6,14'],
+            ['Custo por unidade', 'R$ 4,80'],
+            ['Preço sugerido', 'R$ 12,00'],
             ['Margem', '60%'],
           ].map(([rotulo, valor]) => (
             <div

@@ -78,13 +78,14 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npm test` | Testes do motor de precificação (74 testes) |
 | `npm run test:db` | Testes de isolamento e transação num Postgres temporário |
+| `npm run check:landing` | Verifica a landing num navegador real: overflow em 6 larguras, erros de console e CTAs |
 
 ## Estrutura
 
 ```
 src/
   app/
-    (marketing)/          landing page e guia de precificação
+    (marketing)/          landing page, guia, suporte, termos e privacidade
     (auth)/               entrar, criar conta, recuperar e trocar senha
     (app)/                painel, ingredientes, receitas, precificar,
                           histórico, relatórios, configurações
@@ -94,7 +95,8 @@ src/
     ui/                   botões, campos, cards, estados, ícones
     app/                  navegação e cabeçalhos das telas privadas
     pricing/              resultado, composição do custo, simulador
-    marketing/            cabeçalho, rodapé e demonstração do produto
+    marketing/            seções, cartões, FAQ, CTA e as telas de demonstração
+  lib/demo/               receita de exemplo da vitrine, calculada pelo motor
   lib/
     pricing/              MOTOR DE CÁLCULO (única fonte das fórmulas)
     validation/           esquemas Zod
@@ -110,6 +112,28 @@ supabase/
   tests/                isolamento entre contas, validado num Postgres real
 docs/                     arquitetura e regras de cálculo
 ```
+
+## Identidade visual
+
+Uma família tipográfica só — **Plus Jakarta Sans**, pesos 300 a 800. O contraste
+entre título e texto vem do peso e do espaçamento entre letras, não de uma
+segunda fonte.
+
+A paleta tem duas camadas. As **escalas** (`rose`, `amber`, `sand`) são a
+matéria-prima; os **tokens semânticos** dizem o papel de cada cor e são o que os
+componentes usam:
+
+| Token | Papel |
+| --- | --- |
+| `primary` / `primary-hover` / `primary-soft` | Cor de marca, ações e destaques |
+| `secondary` | Apoio neutro escuro |
+| `accent` | Âmbar de realce, usado com parcimônia |
+| `background` | Fundo da página (branco quente, nunca `#fff` puro) |
+| `surface` / `surface-muted` / `surface-border` | Cartões, faixas e réguas |
+| `content` / `-strong` / `-muted` / `-subtle` | Hierarquia de texto |
+| `success` / `warning` (âmbar) / `danger` | Estados |
+
+Trocar a cor de marca é editar `tailwind.config.ts` num lugar só.
 
 ## As regras de cálculo, em uma tela
 

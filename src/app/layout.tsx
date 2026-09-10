@@ -1,20 +1,22 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 
 import './globals.css';
 import { siteUrl } from '@/lib/supabase/env';
 
-const sans = Inter({
+/**
+ * Uma família só, em vários pesos.
+ *
+ * Plus Jakarta Sans tem a geometria aberta que dá clareza no celular e peso
+ * suficiente (200 a 800) para os títulos terem presença sem precisar de uma
+ * segunda fonte. O contraste entre título e texto vem do peso e do espaçamento
+ * entre letras, não de uma troca de família.
+ */
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
-});
-
-const display = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-  axes: ['SOFT', 'WONK'],
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 const title = 'ControlDolces — saiba quanto custa e quanto cobrar pelos seus doces';
@@ -66,7 +68,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${sans.variable} ${display.variable}`}>
+    <html lang="pt-BR" className={jakarta.variable}>
       <body className="min-h-dvh font-sans">{children}</body>
     </html>
   );

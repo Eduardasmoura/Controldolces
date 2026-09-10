@@ -9,10 +9,13 @@ type Size = 'sm' | 'md' | 'lg';
 const BASE =
   'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-55';
 
+// Usa os tokens semânticos da paleta: trocar a cor de marca acontece no
+// tailwind.config, não aqui.
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800',
-  secondary: 'border border-sand-200 bg-white text-sand-800 hover:border-sand-300 hover:bg-sand-50',
-  ghost: 'text-sand-600 hover:bg-sand-100 hover:text-sand-800',
+  primary: 'bg-primary text-primary-contrast hover:bg-primary-hover active:bg-primary-hover',
+  secondary:
+    'border border-surface-border bg-surface text-content hover:border-content-subtle/40 hover:bg-surface-muted',
+  ghost: 'text-content-muted hover:bg-surface-muted hover:text-content-strong',
   danger: 'border border-danger-100 bg-danger-50 text-danger-700 hover:bg-danger-100',
 };
 

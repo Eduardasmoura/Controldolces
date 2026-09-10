@@ -93,6 +93,17 @@ sem os dados mínimos.
 5. **Recálculo no servidor**: ao salvar uma precificação, o preço vem da tela mas
    todos os custos são recalculados a partir do banco.
 
+## A vitrine não tem números escritos à mão
+
+Todos os valores da landing page saem de `src/lib/demo/brownie.ts` passando pelo
+motor de cálculo. A receita foi montada para custar exatamente R$ 4,80 por
+unidade, e o preço sugerido, o preço mínimo, o lucro, a margem e o markup são
+consequência disso — não texto digitado.
+
+`brownieResult()` roda em tempo de build e **quebra o build** se a receita deixar
+de ser calculável, em vez de publicar uma vitrine com números errados.
+`src/lib/demo/brownie.test.ts` trava os valores anunciados.
+
 ## O que ficou de fora, e por quê
 
 - **Cobrança e planos pagos.** A tabela `subscriptions` existe e nasce com o plano

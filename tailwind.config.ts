@@ -47,6 +47,42 @@ const config: Config = {
           800: '#2E2A26',
           900: '#1C1A17',
         },
+        /**
+         * Tokens semânticos.
+         *
+         * As escalas acima são a matéria-prima; estes nomes dizem o PAPEL de cada
+         * cor. Componentes usam os semânticos (`bg-surface`, `text-muted`), então
+         * um ajuste de marca acontece num lugar só.
+         */
+        primary: {
+          DEFAULT: '#B24460',
+          hover: '#94364E',
+          soft: '#FAE8EB',
+          contrast: '#FFFFFF',
+        },
+        secondary: {
+          DEFAULT: '#45403A',
+          soft: '#F3EFEB',
+          contrast: '#FFFFFF',
+        },
+        accent: {
+          DEFAULT: '#E88024',
+          soft: '#FDEBD3',
+          contrast: '#FFFFFF',
+        },
+        background: '#FDFBF8',
+        surface: {
+          DEFAULT: '#FFFFFF',
+          muted: '#FAF8F6',
+          border: '#E7E1DB',
+        },
+        content: {
+          DEFAULT: '#2E2A26',
+          strong: '#1C1A17',
+          muted: '#5E5750',
+          subtle: '#7D746C',
+          inverse: '#FDFBF8',
+        },
         success: {
           50: '#F0F7F2',
           100: '#DCEDE1',
@@ -63,8 +99,13 @@ const config: Config = {
         },
       },
       fontFamily: {
+        // Uma família para tudo. `display` existe como apelido semântico para
+        // títulos, apontando para a mesma fonte — o contraste vem do peso.
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Georgia', 'serif'],
+        display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        'display-tight': '-0.028em',
       },
       borderRadius: {
         xl: '0.875rem',

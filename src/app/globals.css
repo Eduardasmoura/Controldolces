@@ -12,13 +12,19 @@
   }
 
   body {
-    @apply bg-cream text-sand-800 antialiased;
-    font-feature-settings: 'cv11', 'ss01';
+    @apply bg-background text-content antialiased;
+  }
+
+  /* Títulos grandes pedem entrelinha curta; sem isso a headline do Hero “abre”
+     demais no celular e come duas linhas a mais. */
+  h1,
+  h2 {
+    text-wrap: balance;
   }
 
   /* Foco sempre visível — requisito de acessibilidade, não enfeite. */
   :focus-visible {
-    @apply outline-none ring-2 ring-rose-500 ring-offset-2 ring-offset-cream;
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   }
 
   /* Tira as setinhas dos campos numéricos: no celular elas atrapalham mais do que ajudam. */
@@ -32,7 +38,7 @@
   }
 
   ::selection {
-    @apply bg-rose-200 text-rose-900;
+    @apply bg-primary-soft text-primary-hover;
   }
 }
 
