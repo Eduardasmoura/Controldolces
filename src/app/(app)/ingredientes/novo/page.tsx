@@ -24,6 +24,7 @@ export default async function NewIngredientPage() {
           name: '',
           category: '',
           supplier: '',
+          notes: '',
           purchaseUnit: 'kg',
           purchaseQuantity: '',
           purchasePrice: '',

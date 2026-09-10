@@ -5,29 +5,28 @@ import { useActionState, useMemo, useState } from 'react';
 
 import { SubmitButton } from '@/components/forms/submit-button';
 import { Card, CardBody } from '@/components/ui/card';
-import { SelectField, TextField } from '@/components/ui/field';
+import { SelectField, TextAreaField, TextField } from '@/components/ui/field';
 import { Alert } from '@/components/ui/feedback';
-import { formatUnitCost, parseNumberInput } from '@/lib/format';
-import { ALL_UNITS, costPerBaseUnit, unitLabel, unitShort, baseUnitOf, type Unit } from '@/lib/pricing';
+import { formatCurrency, formatNumber, formatUnitCost, parseNumberInput } from '@/lib/format';
+import { INGREDIENT_CATEGORIES } from '@/lib/ingredient-categories';
+import {
+  ALL_UNITS,
+  baseUnitOf,
+  costPerBaseUnit,
+  toBaseQuantity,
+  unitLabel,
+  unitShort,
+  type Unit,
+} from '@/lib/pricing';
 import { saveIngredientAction } from '@/server/actions/ingredients';
 import { IDLE } from '@/server/form-state';
-
-const CATEGORIAS = [
-  'Chocolates',
-  'Laticínios',
-  'Farinhas e secos',
-  'Açúcares',
-  'Frutas',
-  'Recheios e coberturas',
-  'Embalagens',
-  'Outros',
-];
 
 export type IngredientFormValues = {
   id?: string;
   name: string;
   category: string;
   supplier: string;
+  notes: string;
   purchaseUnit: Unit;
   purchaseQuantity: string;
   purchasePrice: string;
@@ -46,11 +45,28 @@ export function IngredientForm({ initial }: { initial: IngredientFormValues }) {
     if (!purchaseQuantity || purchaseQuantity <= 0 || purchasePrice == null || purchasePrice < 0) {
       return null;
     }
+
+    const baseUnit = baseUnitOf(unit);
+    const baseQuantity = toBaseQuantity(purchaseQuantity, unit);
+    const value = costPerBaseUnit({ purchaseQuantity, purchaseUnit: unit, purchasePrice });
+
+    // Um exemplo de uso concreto ancora o número: "R$ 0,0299 por grama" só faz
+    // sentido quando se vê quanto custam 150 g.
+    const exemploQuantidade = baseUnit === 'un' ? 3 : 150;
+
     return {
-      value: costPerBaseUnit({ purchaseQuantity, purchaseUnit: unit, purchasePrice }),
-      baseUnit: baseUnitOf(unit),
+      value,
+      baseUnit,
+      price: purchasePrice,
+      baseQuantityLabel: `${formatNumber(baseQuantity)} ${unitShort(baseUnit)}`,
+      exemplo:
+        baseQuantity >= exemploQuantidade
+          ? { quantidade: exemploQuantidade, custo: value * exemploQuantidade }
+          : null,
     };
   }, [quantity, price, unit]);
+
+  const precoZerado = parseNumberInput(price) === 0;
 
   return (
     <Card>
@@ -81,7 +97,7 @@ export function IngredientForm({ initial }: { initial: IngredientFormValues }) {
             error={state.fieldErrors?.category}
           >
             <option value="">Sem categoria</option>
-            {CATEGORIAS.map((categoria) => (
+            {INGREDIENT_CATEGORIES.map((categoria) => (
               <option key={categoria} value={categoria}>
                 {categoria}
               </option>
@@ -134,18 +150,37 @@ export function IngredientForm({ initial }: { initial: IngredientFormValues }) {
             />
 
             {preview ? (
-              <div className="rounded-xl border border-rose-200 bg-white px-4 py-3">
-                <p className="text-xs font-medium text-sand-500">Custo calculado</p>
-                <p className="mt-0.5 text-sm text-sand-800">
+              <div className="rounded-xl border border-primary/30 bg-surface px-4 py-3.5">
+                <p className="text-xs font-medium text-content-subtle">Custo calculado</p>
+                <p className="mt-0.5 text-content-strong">
                   <strong className="font-semibold tabular-nums">
                     {formatUnitCost(preview.value)}
                   </strong>{' '}
                   por {unitShort(preview.baseUnit)}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-sand-500">
-                  É esse valor que o sistema usa ao multiplicar pela quantidade da receita.
+
+                {/* Mostrar a conta é o que faz a usuária confiar no número. */}
+                <p className="mt-1.5 text-xs leading-relaxed text-content-subtle">
+                  {formatCurrency(preview.price)} ÷ {preview.baseQuantityLabel} ={' '}
+                  {formatUnitCost(preview.value)} por {unitShort(preview.baseUnit)}
                 </p>
+
+                {preview.exemplo ? (
+                  <p className="mt-2 border-t border-surface-border pt-2 text-xs leading-relaxed text-content-muted">
+                    Se uma receita usar {preview.exemplo.quantidade} {unitShort(preview.baseUnit)},
+                    o custo será de{' '}
+                    <strong className="font-semibold">{formatCurrency(preview.exemplo.custo)}</strong>.
+                  </p>
+                ) : null}
               </div>
+            ) : null}
+
+            {precoZerado ? (
+              <Alert tone="warning">
+                Este ingrediente está com custo R$ 0,00 e pode afetar sua precificação. Se ele foi
+                ganhado ou sobrou de outra produção, tudo bem — só lembre que ele não vai somar nada
+                ao custo das receitas.
+              </Alert>
             ) : null}
           </fieldset>
 
@@ -155,6 +190,14 @@ export function IngredientForm({ initial }: { initial: IngredientFormValues }) {
             defaultValue={initial.supplier}
             placeholder="Opcional"
             error={state.fieldErrors?.supplier}
+          />
+
+          <TextAreaField
+            label="Observações"
+            name="notes"
+            defaultValue={initial.notes}
+            placeholder="Marca preferida, onde você compra, rendimento real. Opcional."
+            error={state.fieldErrors?.notes}
           />
 
           <div className="flex flex-col gap-2 sm:flex-row-reverse">

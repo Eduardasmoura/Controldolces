@@ -57,13 +57,15 @@ export async function saveIngredientAction(
   }
 
   const supabase = await createSupabaseServerClient();
-  const { id, name, category, supplier, purchaseUnit, purchaseQuantity, purchasePrice } = parsed.data;
+  const { id, name, category, supplier, notes, purchaseUnit, purchaseQuantity, purchasePrice } =
+    parsed.data;
 
   const payload = {
     business_id: businessId,
     name,
     category: category || null,
     supplier: supplier || null,
+    notes: notes || null,
     purchase_unit: purchaseUnit as never,
     purchase_quantity: purchaseQuantity,
     purchase_price: purchasePrice,
@@ -121,10 +123,17 @@ export async function saveIngredientAction(
   }
 
   revalidarTudo();
-  redirect('/ingredientes?salvo=1');
+  redirect(`/ingredientes?salvo=${id ? 'editado' : 'novo'}`);
 }
 
-/** Arquiva o ingrediente. Não apagamos de vez: fichas antigas continuariam órfãs. */
+/**
+ * Exclusão definitiva.
+ *
+ * Só acontece quando o ingrediente não está em nenhuma receita. Havendo
+ * dependência, a linha não é apagada em silêncio: a action recusa e explica,
+ * e a tela oferece desativar no lugar. Apagar levaria junto o custo de fichas
+ * técnicas antigas.
+ */
 export async function deleteIngredientAction(
   _state: FormState,
   formData: FormData,
@@ -151,13 +160,15 @@ export async function deleteIngredientAction(
 
   if ((count ?? 0) > 0) {
     return failure(
-      'Esse ingrediente está sendo usado em uma receita. Remova-o da ficha técnica antes de excluir.',
+      `Este ingrediente está sendo utilizado em ${count} ${
+        count === 1 ? 'receita' : 'receitas'
+      }. Desative-o para parar de usá-lo em novas receitas sem alterar as antigas.`,
     );
   }
 
   const { error } = await supabase
     .from('ingredients')
-    .update({ archived_at: new Date().toISOString() })
+    .delete()
     .eq('business_id', businessId)
     .eq('id', id);
 
@@ -165,4 +176,42 @@ export async function deleteIngredientAction(
 
   revalidarTudo();
   return success('Ingrediente excluído.');
+}
+
+/**
+ * Desativa ou reativa.
+ *
+ * Um ingrediente inativo some das listas de novas receitas, mas continua
+ * inteiro nas fichas antigas e no histórico de preços — que é justamente o que
+ * mantém uma precificação passada explicável.
+ */
+export async function toggleIngredientActiveAction(
+  _state: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const id = formData.get('id');
+  const reativar = formData.get('reativar') === '1';
+
+  if (typeof id !== 'string' || id.length === 0) {
+    return failure('Não conseguimos identificar o ingrediente.');
+  }
+
+  let businessId: string;
+  try {
+    businessId = await requireBusinessId();
+  } catch (error) {
+    return erroDeContexto(error) ?? databaseError('ingrediente: contexto', error);
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('ingredients')
+    .update({ archived_at: reativar ? null : new Date().toISOString() })
+    .eq('business_id', businessId)
+    .eq('id', id);
+
+  if (error) return databaseError('ingrediente: desativar', error);
+
+  revalidarTudo();
+  return success(reativar ? 'Ingrediente reativado.' : 'Ingrediente desativado.');
 }

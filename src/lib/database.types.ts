@@ -44,6 +44,8 @@ export type IngredientRow = Timestamps & {
   purchase_price: number;
   /** Custo por grama, mililitro ou unidade. Coluna gerada: o banco calcula, a aplicação só lê. */
   unit_cost: number;
+  notes: string | null;
+  /** Preenchido quando o ingrediente é desativado. */
   archived_at: string | null;
 };
 
@@ -54,6 +56,12 @@ export type IngredientPriceRow = {
   purchase_unit: MeasurementUnit;
   purchase_quantity: number;
   purchase_price: number;
+  /** Quantidade convertida para a unidade-base. Coluna gerada. */
+  normalized_quantity: number;
+  normalized_unit: MeasurementUnit;
+  /** Custo por unidade-base quando este preço valia. Coluna gerada. */
+  unit_cost: number;
+  note: string | null;
   recorded_at: string;
 };
 
@@ -218,6 +226,7 @@ export type Database = {
     Functions: {
       owned_business_ids: { Args: Record<string, never>; Returns: string[] };
       unit_base_factor: { Args: { u: MeasurementUnit }; Returns: number };
+      base_unit_of: { Args: { u: MeasurementUnit }; Returns: MeasurementUnit };
       dashboard_summary: {
         Args: Record<string, never>;
         Returns: {

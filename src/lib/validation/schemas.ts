@@ -109,14 +109,17 @@ export const ingredientSchema = z.object({
   name: z.string().trim().min(2, 'Informe o nome do ingrediente.').max(120),
   category: z.string().trim().max(60).optional().or(z.literal('')),
   supplier: z.string().trim().max(120).optional().or(z.literal('')),
+  notes: z.string().trim().max(500).optional().or(z.literal('')),
   purchaseUnit: unitSchema,
   purchaseQuantity: numeroObrigatorio({
     min: 0.0001,
     mensagemMin: 'A quantidade comprada precisa ser maior que zero.',
   }),
+  // Zero é permitido: ingrediente ganhado, brinde do fornecedor, sobra de outra
+  // produção. A tela avisa do impacto na precificação em vez de barrar.
   purchasePrice: numeroObrigatorio({
-    min: 0.0001,
-    mensagemMin: 'O preço pago precisa ser maior que zero.',
+    min: 0,
+    mensagemMin: 'O preço pago não pode ser negativo.',
   }),
 });
 

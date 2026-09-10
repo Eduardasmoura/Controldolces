@@ -43,6 +43,18 @@ export function costPerBaseUnit(purchase: IngredientPurchase): number {
   return purchase.purchasePrice / baseQuantity;
 }
 
+/**
+ * CMV — Custo da Mercadoria Vendida: ingredientes + embalagem.
+ *
+ * Fica de fora tudo o que é custo de OPERAR (mão de obra, gás, energia,
+ * indiretos). O CMV mede a mercadoria, não a operação. Separar os dois é o que
+ * permite comparar produtos entre si sem que o tempo de forno de um bolo
+ * distorça a comparação com um brigadeiro.
+ */
+export function cmvFrom(breakdown: CostBreakdown): number {
+  return breakdown.ingredients + breakdown.packaging;
+}
+
 /** Custo de uma quantidade usada numa receita. */
 export function ingredientLineCost(ingredient: RecipeIngredientInput): number {
   const used = toBaseQuantity(ingredient.quantity, ingredient.unit);
@@ -134,6 +146,8 @@ export function simulatePrice(
   salePrice: number,
   feesPercent: number,
   yieldQuantity = 1,
+  /** CMV unitário. Quando omitido, o percentual de CMV volta zero. */
+  unitCmv = 0,
 ): PriceSimulation {
   const feesAmount = salePrice * (feesPercent / 100);
   const profitPerUnit = salePrice - feesAmount - unitCost;
@@ -146,6 +160,7 @@ export function simulatePrice(
     marginPercent: marginAtPrice(unitCost, salePrice, feesPercent),
     markup: markupAtPrice(unitCost, salePrice),
     coversCosts: profitPerUnit >= 0,
+    cmvPercent: isPositiveNumber(salePrice) ? (unitCmv / salePrice) * 100 : 0,
   };
 }
 
@@ -321,6 +336,7 @@ export function calculatePricing(input: PricingInput): PricingOutcome {
       ingredientLines,
       batch,
       unit,
+      cmv: { unit: cmvFrom(unit), batch: cmvFrom(batch) },
       minimumPrice,
       recommendedPrice,
       desiredMarginPercent: input.desiredMarginPercent,
@@ -330,6 +346,7 @@ export function calculatePricing(input: PricingInput): PricingOutcome {
         recommendedPrice,
         input.variableFeesPercent,
         yieldQuantity,
+        cmvFrom(unit),
       ),
     },
   };

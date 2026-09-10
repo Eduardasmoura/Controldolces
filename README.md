@@ -41,6 +41,8 @@ as migrações **na ordem**:
    gás/energia do negócio e custo aberto por categoria nas precificações
 5. `supabase/migrations/0005_onboarding_etapas.sql` — estado do onboarding
 6. `supabase/migrations/0006_dashboard_summary.sql` — resumo do painel numa consulta
+7. `supabase/migrations/0007_ingredientes.sql` — observações, histórico completo e índice de busca
+8. `supabase/migrations/0008_unit_cost_seguro.sql` — divisão blindada nas colunas de custo
 
 Com a CLI do Supabase, `supabase db push` aplica todas.
 
@@ -78,7 +80,7 @@ npm run dev
 | `npm run build` | Build de produção |
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run lint` | ESLint |
-| `npm test` | Testes do motor de precificação (74 testes) |
+| `npm test` | Testes do motor de precificação (95 testes) |
 | `npm run test:db` | Testes de isolamento e transação num Postgres temporário |
 | `npm run check:landing` | Verifica a landing num navegador real: overflow em 6 larguras, erros de console e CTAs |
 
@@ -145,6 +147,8 @@ Trocar a cor de marca é editar `tailwind.config.ts` num lugar só.
 - **Custo unitário**: `custo do lote ÷ rendimento`, mais o rateio de custos indiretos.
 - **Margem** = `lucro ÷ preço de venda`. **Markup** = `preço ÷ custo`. Nunca são
   tratados como sinônimos.
+- **CMV** (Custo da Mercadoria Vendida) = ingredientes + embalagem. Mão de obra,
+  gás, energia e indiretos ficam de fora: medem a operação, não a mercadoria.
 - **Preço recomendado**: `custo ÷ (1 − margem − taxas)`. Garante a margem pedida
   *depois* das taxas que incidem sobre a venda.
 - **Preço mínimo**: `custo ÷ (1 − taxas)` — o ponto de equilíbrio, com margem

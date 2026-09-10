@@ -59,6 +59,7 @@ echo
 echo "Executando testes..."
 run -f "$HERE/10_isolamento.sql"
 run -f "$HERE/20_onboarding_painel.sql"
+run -f "$HERE/30_ingredientes.sql"
 
 # O contrato do custo por unidade-base é gerado a partir dos casos compartilhados
 # com o teste do motor, para as duas implementações não divergirem em silêncio.

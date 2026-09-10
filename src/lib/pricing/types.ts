@@ -98,6 +98,11 @@ export interface PriceSimulation {
   markup: number;
   /** Falso quando o preço não cobre custo + taxas. */
   coversCosts: boolean;
+  /**
+   * CMV sobre o preço de venda, em %. É o indicador que a confeitaria usa para
+   * comparar produtos entre si e com o mercado ("meu CMV está em 30%").
+   */
+  cmvPercent: number;
 }
 
 export interface PricingResult {
@@ -105,6 +110,15 @@ export interface PricingResult {
   ingredientLines: IngredientCostLine[];
   batch: CostBreakdown;
   unit: CostBreakdown;
+  /**
+   * CMV — Custo da Mercadoria Vendida.
+   *
+   * Neste sistema: ingredientes + embalagem, ou seja, o que sai pela porta junto
+   * com o produto. Mão de obra, gás, energia e custos indiretos NÃO entram: são
+   * custos de operar, não da mercadoria. A definição está dita na tela para não
+   * haver dúvida sobre o que o número mede.
+   */
+  cmv: { unit: number; batch: number };
   /** Menor preço aceitável pela regra configurada (por padrão, o ponto de equilíbrio). */
   minimumPrice: number;
   /** Preço que entrega exatamente a margem desejada depois das taxas. */

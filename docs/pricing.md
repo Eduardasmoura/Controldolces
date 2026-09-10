@@ -70,6 +70,20 @@ custoTotalDoLote  = custoDiretoDoLote + custosIndiretos
 custoUnitário     = custoTotalDoLote ÷ rendimento
 ```
 
+## CMV — Custo da Mercadoria Vendida
+
+```
+CMV = ingredientes + embalagem
+```
+
+É o que sai pela porta junto com o produto. Mão de obra, gás, energia e custos
+indiretos **não** entram: medem o custo de operar, não o da mercadoria. Separar
+os dois é o que permite comparar produtos entre si sem que o tempo de forno de
+um bolo distorça a comparação com um brigadeiro.
+
+`cmvPercent` é o CMV sobre o preço de venda — o indicador que a confeitaria usa
+para se comparar com o mercado ("meu CMV está em 30%").
+
 ## Margem e markup
 
 Duas grandezas diferentes, com denominadores diferentes:

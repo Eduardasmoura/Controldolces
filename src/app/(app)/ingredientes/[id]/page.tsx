@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { PageHeader } from '@/components/app/page-header';
+import { PriceHistory } from '@/components/ingredients/price-history';
 import { requireContext } from '@/server/context';
-import { getIngredient } from '@/server/queries';
+import { getIngredient, listIngredientPriceHistory } from '@/server/queries';
 import type { Unit } from '@/lib/pricing';
 
 import { IngredientForm } from '../ingredient-form';
@@ -22,6 +23,8 @@ export default async function EditIngredientPage({
   const ingredient = await getIngredient(business.id, id);
   if (!ingredient) notFound();
 
+  const historico = await listIngredientPriceHistory(business.id, id);
+
   return (
     <>
       <PageHeader
@@ -34,11 +37,16 @@ export default async function EditIngredientPage({
           name: ingredient.name,
           category: ingredient.category ?? '',
           supplier: ingredient.supplier ?? '',
+          notes: ingredient.notes ?? '',
           purchaseUnit: ingredient.purchase_unit as Unit,
           purchaseQuantity: String(ingredient.purchase_quantity),
           purchasePrice: String(ingredient.purchase_price),
         }}
       />
+
+      <div className="mt-6">
+        <PriceHistory entries={historico} />
+      </div>
     </>
   );
 }

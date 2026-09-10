@@ -47,6 +47,7 @@ function ingredient(overrides: Partial<IngredientRow> = {}): IngredientRow {
     // Coluna gerada pelo banco; nos testes é preenchida com o mesmo valor que o
     // Postgres calcularia, para o fixture refletir uma linha real.
     unit_cost: 29.9 / 1000,
+    notes: null,
     archived_at: null,
     created_at: AGORA,
     updated_at: AGORA,

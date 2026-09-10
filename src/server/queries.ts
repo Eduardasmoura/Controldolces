@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import type {
+  IngredientPriceRow,
   IngredientRow,
   PricingCalculationRow,
   PricingHistoryRow,
@@ -10,6 +11,7 @@ import type {
   RecipeRow,
   SubscriptionRow,
 } from '@/lib/database.types';
+import { SEM_CATEGORIA } from '@/lib/ingredient-categories';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 /**
@@ -96,6 +98,105 @@ export const listIngredients = cache(async (businessId: string): Promise<Ingredi
   return (data ?? []).map(normalizeIngredient);
 });
 
+export type IngredientFilters = {
+  /** Termo digitado na busca. Casa com qualquer parte do nome. */
+  search?: string;
+  /** Categoria exata, ou SEM_CATEGORIA para os que não têm nenhuma. */
+  category?: string;
+  /** Inclui os desativados na listagem. */
+  includeInactive?: boolean;
+  page?: number;
+  pageSize?: number;
+};
+
+export type IngredientPage = {
+  rows: IngredientRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+};
+
+export const INGREDIENTS_PAGE_SIZE = 20;
+
+/**
+ * Listagem paginada, com busca e filtro feitos no banco.
+ *
+ * Filtrar em JavaScript exigiria trazer a lista inteira — o que funciona com 20
+ * insumos e vira um problema com 800. O Postgres devolve só a página pedida e a
+ * contagem total, numa consulta só.
+ */
+export const listIngredientsPage = cache(
+  async (businessId: string, filters: IngredientFilters = {}): Promise<IngredientPage> => {
+    const pageSize = filters.pageSize ?? INGREDIENTS_PAGE_SIZE;
+    const page = Math.max(1, filters.page ?? 1);
+    const from = (page - 1) * pageSize;
+
+    const supabase = await createSupabaseServerClient();
+    let query = supabase
+      .from('ingredients')
+      .select('*', { count: 'exact' })
+      .eq('business_id', businessId);
+
+    if (!filters.includeInactive) query = query.is('archived_at', null);
+
+    const termo = filters.search?.trim();
+    if (termo) {
+      // Escapa os curingas do LIKE para que "100%" seja buscado como texto.
+      const seguro = termo.replace(/[%_\\]/g, (caractere) => `\\${caractere}`);
+      query = query.ilike('name', `%${seguro}%`);
+    }
+
+    if (filters.category === SEM_CATEGORIA) {
+      query = query.is('category', null);
+    } else if (filters.category) {
+      query = query.eq('category', filters.category);
+    }
+
+    const { data, count, error } = await query
+      .order('name', { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error('[controldolces] listIngredientsPage', error);
+      throw new Error('FALHA_LEITURA_INGREDIENTES');
+    }
+
+    const total = count ?? 0;
+
+    return {
+      rows: (data ?? []).map(normalizeIngredient),
+      total,
+      page,
+      pageSize,
+      pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    };
+  },
+);
+
+/** Histórico de preços de um ingrediente, do mais recente para o mais antigo. */
+export const listIngredientPriceHistory = cache(
+  async (businessId: string, ingredientId: string): Promise<IngredientPriceRow[]> => {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase
+      .from('ingredient_prices')
+      .select('*')
+      .eq('business_id', businessId)
+      .eq('ingredient_id', ingredientId)
+      .order('recorded_at', { ascending: false })
+      .limit(50);
+
+    return (data ?? []).map((row) => ({
+      ...row,
+      purchase_quantity: num(row.purchase_quantity),
+      purchase_price: num(row.purchase_price),
+      normalized_quantity: num(row.normalized_quantity),
+      unit_cost: num(row.unit_cost),
+    }));
+  },
+);
+
+/** Em quantas receitas cada ingrediente aparece. Uma consulta para a lista toda. */
 export const getIngredient = cache(
   async (businessId: string, id: string): Promise<IngredientRow | null> => {
     const supabase = await createSupabaseServerClient();

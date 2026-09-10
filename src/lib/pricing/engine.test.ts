@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_MARGIN_PERCENT,
   calculatePricing,
+  cmvFrom,
   costPerBaseUnit,
   ingredientLineCost,
   laborCost,
@@ -570,5 +571,109 @@ describe('valores inválidos', () => {
     }
     expect(Number.isFinite(valido.recommendedPrice)).toBe(true);
     expect(Number.isFinite(valido.minimumPrice)).toBe(true);
+  });
+});
+
+
+describe('CMV — Custo da Mercadoria Vendida', () => {
+  it('soma ingredientes e embalagem, e nada mais', () => {
+    const breakdown = {
+      ingredients: 10,
+      packaging: 4,
+      labor: 20,
+      gas: 3,
+      energy: 2,
+      other: 1,
+      indirect: 5,
+      total: 45,
+    };
+    expect(cmvFrom(breakdown)).toBeCloseTo(14, 10);
+  });
+
+  it('mão de obra e energia não entram: são custo de operar, não da mercadoria', () => {
+    const resultado = expectOk(
+      baseInput({
+        yieldQuantity: 10,
+        labor: { hourlyRate: 60, minutes: 120 },
+        extras: [
+          { label: 'Caixa', category: 'packaging', amount: 2, scope: 'unit' },
+          { label: 'Energia', category: 'energy', amount: 30, scope: 'batch' },
+        ],
+      }),
+    );
+
+    // ingredientes 1,00 + embalagem 20,00 no lote
+    expect(resultado.cmv.batch).toBeCloseTo(21, 10);
+    expect(resultado.cmv.unit).toBeCloseTo(2.1, 10);
+    // o custo total é bem maior, porque inclui a operação
+    expect(resultado.batch.total).toBeCloseTo(171, 10);
+  });
+
+  it('o CMV percentual mede o CMV sobre o preço de venda', () => {
+    const simulacao = simulatePrice(10, 20, 0, 1, 6);
+    expect(simulacao.cmvPercent).toBeCloseTo(30, 10);
+  });
+
+  it('sem embalagem, o CMV é só o custo dos ingredientes', () => {
+    const resultado = expectOk(baseInput({ yieldQuantity: 10, extras: [] }));
+    expect(resultado.cmv.unit).toBeCloseTo(resultado.unit.ingredients, 10);
+  });
+
+  it('preço zero não gera divisão por zero no percentual', () => {
+    expect(simulatePrice(10, 0, 0, 1, 6).cmvPercent).toBe(0);
+  });
+});
+
+describe('custo por unidade-base — casos da FASE 4', () => {
+  const casos = [
+    { nome: '1 kg por R$ 30,00', quantidade: 1, unidade: 'kg' as const, preco: 30, esperado: 0.03 },
+    { nome: '500 g por R$ 15,00', quantidade: 500, unidade: 'g' as const, preco: 15, esperado: 0.03 },
+    { nome: '1 L por R$ 10,00', quantidade: 1, unidade: 'l' as const, preco: 10, esperado: 0.01 },
+    { nome: '10 unidades por R$ 20,00', quantidade: 10, unidade: 'un' as const, preco: 20, esperado: 2 },
+    { nome: '2 kg por R$ 40,00', quantidade: 2, unidade: 'kg' as const, preco: 40, esperado: 0.02 },
+    { nome: '2 L por R$ 12,00', quantidade: 2, unidade: 'l' as const, preco: 12, esperado: 0.006 },
+    { nome: '30 unidades por R$ 24,00', quantidade: 30, unidade: 'un' as const, preco: 24, esperado: 0.8 },
+    { nome: '395 g por R$ 6,99', quantidade: 395, unidade: 'g' as const, preco: 6.99, esperado: 0.0176962025316456 },
+    { nome: '300 g por R$ 12,00', quantidade: 300, unidade: 'g' as const, preco: 12, esperado: 0.04 },
+  ];
+
+  for (const caso of casos) {
+    it(caso.nome, () => {
+      const custo = costPerBaseUnit({
+        purchaseQuantity: caso.quantidade,
+        purchaseUnit: caso.unidade,
+        purchasePrice: caso.preco,
+      });
+      expect(custo).toBeCloseTo(caso.esperado, 10);
+    });
+  }
+
+  it('137 g de chocolate a R$ 29,90/kg custam R$ 4,10 na tela e 4,0963 por dentro', () => {
+    const custo = ingredientLineCost(
+      ingredient({ quantity: 137, unit: 'g', purchaseQuantity: 1, purchaseUnit: 'kg', purchasePrice: 29.9 }),
+    );
+    expect(custo).toBeCloseTo(4.0963, 10);
+    expect(roundCurrency(custo)).toBe(4.1);
+  });
+
+  it('3 ovos de uma compra de 30 por R$ 24,00 custam R$ 2,40', () => {
+    const custo = ingredientLineCost(
+      ingredient({ quantity: 3, unit: 'un', purchaseQuantity: 30, purchaseUnit: 'un', purchasePrice: 24 }),
+    );
+    expect(custo).toBeCloseTo(2.4, 10);
+  });
+
+  it('guardar o custo arredondado acumularia erro — por isso ele não é arredondado', () => {
+    const preciso = costPerBaseUnit({ purchaseQuantity: 1, purchaseUnit: 'kg', purchasePrice: 29.9 });
+    const arredondadoCedo = roundCurrency(preciso); // R$ 0,0299 viraria R$ 0,03
+
+    // Dez centavos por quilo usado. Parece pouco, mas é por ingrediente e por
+    // receita: numa produção com cinco insumos o desvio já aparece no preço.
+    const desvioEmUmQuilo = Math.abs(arredondadoCedo * 1000 - preciso * 1000);
+    expect(desvioEmUmQuilo).toBeCloseTo(0.1, 6);
+
+    // O valor guardado é o exato, não o arredondado.
+    expect(preciso).not.toBe(arredondadoCedo);
+    expect(preciso).toBeCloseTo(0.0299, 10);
   });
 });
