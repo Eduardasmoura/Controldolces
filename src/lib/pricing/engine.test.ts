@@ -93,6 +93,34 @@ describe('custo do ingrediente', () => {
 });
 
 describe('exemplo canônico do briefing', () => {
+  it('1000 g por R$ 10,00, usando 100 g, rendimento 10 -> R$ 0,10 por unidade', () => {
+    const resultado = expectOk(
+      baseInput({
+        yieldQuantity: 10,
+        ingredients: [
+          ingredient({ quantity: 100, unit: 'g', purchaseQuantity: 1000, purchaseUnit: 'g', purchasePrice: 10 }),
+        ],
+        desiredMarginPercent: 0,
+      }),
+    );
+    expect(resultado.batch.ingredients).toBeCloseTo(1, 10);
+    expect(resultado.batch.total).toBeCloseTo(1, 10);
+    expect(resultado.unit.total).toBeCloseTo(0.1, 10);
+  });
+
+  it('a mesma compra declarada em quilos dá o mesmo resultado', () => {
+    const resultado = expectOk(
+      baseInput({
+        yieldQuantity: 10,
+        ingredients: [
+          ingredient({ quantity: 100, unit: 'g', purchaseQuantity: 1, purchaseUnit: 'kg', purchasePrice: 10 }),
+        ],
+        desiredMarginPercent: 0,
+      }),
+    );
+    expect(resultado.unit.total).toBeCloseTo(0.1, 10);
+  });
+
   it('100 g por R$ 10,00, usando 50 g, rendimento 10 -> R$ 0,50 por unidade', () => {
     const resultado = expectOk(
       baseInput({
@@ -466,5 +494,81 @@ describe('validações', () => {
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
     expect(outcome.issues[0]?.message).toMatch(/100%/);
+  });
+});
+
+
+describe('valores zero', () => {
+  it('custo zero em todas as categorias não quebra o cálculo', () => {
+    const resultado = expectOk(
+      baseInput({
+        yieldQuantity: 1,
+        ingredients: [ingredient({ quantity: 1, unit: 'g', purchaseQuantity: 1000, purchaseUnit: 'g', purchasePrice: 0.001 })],
+        extras: [
+          { label: 'Sem custo', category: 'other', amount: 0, scope: 'batch' },
+          { label: 'Embalagem doada', category: 'packaging', amount: 0, scope: 'unit' },
+        ],
+        labor: { hourlyRate: 0, minutes: 30 },
+        desiredMarginPercent: 0,
+      }),
+    );
+    expect(resultado.batch.labor).toBe(0);
+    expect(resultado.batch.packaging).toBe(0);
+    expect(resultado.unit.total).toBeGreaterThan(0);
+  });
+
+  it('margem zero devolve exatamente o custo somado às taxas', () => {
+    const resultado = expectOk(baseInput({ yieldQuantity: 1, desiredMarginPercent: 0 }));
+    expect(resultado.recommendedPrice).toBe(resultado.minimumPrice);
+  });
+
+  it('tempo de produção zero não gera custo de mão de obra', () => {
+    const resultado = expectOk(baseInput({ labor: { hourlyRate: 50, minutes: 0 } }));
+    expect(resultado.batch.labor).toBe(0);
+  });
+});
+
+describe('valores inválidos', () => {
+  it('recusa preço de compra negativo', () => {
+    const outcome = calculatePricing(
+      baseInput({ ingredients: [ingredient({ purchasePrice: -10 })] }),
+    );
+    expect(outcome.ok).toBe(false);
+  });
+
+  it('recusa quantidade comprada negativa', () => {
+    const outcome = calculatePricing(
+      baseInput({ ingredients: [ingredient({ purchaseQuantity: -1 })] }),
+    );
+    expect(outcome.ok).toBe(false);
+  });
+
+  it('recusa margem negativa', () => {
+    expect(calculatePricing(baseInput({ desiredMarginPercent: -10 })).ok).toBe(false);
+  });
+
+  it('recusa taxas negativas', () => {
+    expect(calculatePricing(baseInput({ variableFeesPercent: -5 })).ok).toBe(false);
+  });
+
+  it('recusa valor de hora negativo', () => {
+    const outcome = calculatePricing(baseInput({ labor: { hourlyRate: -20, minutes: 60 } }));
+    expect(outcome.ok).toBe(false);
+  });
+
+  it('recusa rendimento negativo', () => {
+    expect(calculatePricing(baseInput({ yieldQuantity: -5 })).ok).toBe(false);
+  });
+
+  it('não devolve NaN nem Infinity quando a entrada é absurda', () => {
+    const outcome = calculatePricing(baseInput({ yieldQuantity: Number.NaN }));
+    expect(outcome.ok).toBe(false);
+
+    const valido = expectOk(baseInput());
+    for (const valor of Object.values(valido.unit)) {
+      expect(Number.isFinite(valor)).toBe(true);
+    }
+    expect(Number.isFinite(valido.recommendedPrice)).toBe(true);
+    expect(Number.isFinite(valido.minimumPrice)).toBe(true);
   });
 });

@@ -18,6 +18,8 @@ export function toIngredientOptions(rows: IngredientRow[]): IngredientOption[] {
 export function toCostContext(settings: CostSettingsRow): CostContext {
   return {
     laborHourlyRate: settings.labor_hourly_rate,
+    gasCost: settings.gas_cost,
+    electricityCost: settings.electricity_cost,
     defaultMarginPercent: settings.default_margin_percent,
     minimumMarginPercent: settings.minimum_margin_percent,
     variableFeesPercent: settings.variable_fees_percent,

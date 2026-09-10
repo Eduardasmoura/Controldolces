@@ -79,17 +79,30 @@ export async function savePricingAction(_state: FormState, formData: FormData): 
     unit: result.unit,
   };
 
+  // Os custos são gravados abertos por categoria, sempre referentes ao LOTE.
+  // Ficar só no JSONB obrigaria a abrir o JSON para qualquer relatório.
   const registro = {
     business_id: businessId,
     product_id: detail.product.id,
     sale_price: salePrice,
     unit_cost: roundTo(result.unit.total, 4),
-    batch_cost: roundTo(result.batch.total, 4),
+    ingredient_cost: roundTo(result.batch.ingredients, 4),
+    packaging_cost: roundTo(result.batch.packaging, 4),
+    labor_cost: roundTo(result.batch.labor, 4),
+    gas_cost: roundTo(result.batch.gas, 4),
+    electricity_cost: roundTo(result.batch.energy, 4),
+    other_cost: roundTo(result.batch.other, 4),
+    indirect_cost: roundTo(result.batch.indirect, 4),
+    total_cost: roundTo(result.batch.total, 4),
     minimum_price: result.minimumPrice,
-    recommended_price: result.recommendedPrice,
-    margin_percent: roundTo(simulation.marginPercent, 3),
+    suggested_price: result.recommendedPrice,
+    /** O que a usuária pediu... */
+    desired_margin: roundTo(parsed.data.marginPercent, 3),
+    /** ...e o que o preço praticado de fato entrega. */
+    margin_percentage: roundTo(simulation.marginPercent, 3),
     markup: roundTo(simulation.markup, 4),
     profit_per_unit: roundTo(simulation.profitPerUnit, 4),
+    profit_total: roundTo(simulation.profitPerBatch, 4),
     yield_quantity: result.yieldQuantity,
     input_snapshot: snapshot as never,
     breakdown: breakdown as never,
@@ -103,20 +116,11 @@ export async function savePricingAction(_state: FormState, formData: FormData): 
 
   if (error) return databaseError('precificação: salvar', error);
 
+  // O histórico recebe as mesmas colunas, mais o nome do produto: se o produto
+  // for excluído depois, o registro continua legível.
   const { error: historyError } = await supabase.from('pricing_history').insert({
-    business_id: businessId,
-    product_id: detail.product.id,
+    ...registro,
     product_name: detail.product.name,
-    sale_price: registro.sale_price,
-    unit_cost: registro.unit_cost,
-    minimum_price: registro.minimum_price,
-    recommended_price: registro.recommended_price,
-    margin_percent: registro.margin_percent,
-    markup: registro.markup,
-    profit_per_unit: registro.profit_per_unit,
-    yield_quantity: registro.yield_quantity,
-    input_snapshot: snapshot as never,
-    breakdown: breakdown as never,
   });
 
   if (historyError) console.error('[controldolces] precificação: histórico', historyError);

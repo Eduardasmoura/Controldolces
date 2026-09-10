@@ -28,11 +28,45 @@ function num(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+/**
+ * Campos financeiros de uma precificação, sempre como número.
+ * Compartilhado pelas duas tabelas de precificação, que têm as mesmas colunas.
+ */
+function normalizePricingNumbers<T extends Record<string, unknown>>(row: T) {
+  const campos = [
+    'sale_price',
+    'unit_cost',
+    'ingredient_cost',
+    'packaging_cost',
+    'labor_cost',
+    'gas_cost',
+    'electricity_cost',
+    'other_cost',
+    'indirect_cost',
+    'total_cost',
+    'minimum_price',
+    'suggested_price',
+    'desired_margin',
+    'margin_percentage',
+    'markup',
+    'profit_per_unit',
+    'profit_total',
+    'yield_quantity',
+  ] as const;
+
+  const saida: Record<string, number> = {};
+  for (const campo of campos) {
+    if (campo in row) saida[campo] = num(row[campo]);
+  }
+  return saida;
+}
+
 export function normalizeIngredient(row: IngredientRow): IngredientRow {
   return {
     ...row,
     purchase_quantity: num(row.purchase_quantity),
     purchase_price: num(row.purchase_price),
+    unit_cost: num(row.unit_cost),
   };
 }
 
@@ -189,15 +223,7 @@ export const listSavedPricings = cache(async (businessId: string): Promise<Saved
 
   return (data ?? []).map((row) => ({
     ...row,
-    sale_price: num(row.sale_price),
-    unit_cost: num(row.unit_cost),
-    batch_cost: num(row.batch_cost),
-    minimum_price: num(row.minimum_price),
-    recommended_price: num(row.recommended_price),
-    margin_percent: num(row.margin_percent),
-    markup: num(row.markup),
-    profit_per_unit: num(row.profit_per_unit),
-    yield_quantity: num(row.yield_quantity),
+    ...normalizePricingNumbers(row),
     product: byId.get(row.product_id) ?? null,
   }));
 });
@@ -212,17 +238,7 @@ export const listPricingHistory = cache(
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    return (data ?? []).map((row) => ({
-      ...row,
-      sale_price: num(row.sale_price),
-      unit_cost: num(row.unit_cost),
-      minimum_price: num(row.minimum_price),
-      recommended_price: num(row.recommended_price),
-      margin_percent: num(row.margin_percent),
-      markup: num(row.markup),
-      profit_per_unit: num(row.profit_per_unit),
-      yield_quantity: num(row.yield_quantity),
-    }));
+    return (data ?? []).map((row) => ({ ...row, ...normalizePricingNumbers(row) }));
   },
 );
 

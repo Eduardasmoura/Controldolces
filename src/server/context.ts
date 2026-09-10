@@ -58,13 +58,15 @@ export const getBusiness = cache(async (): Promise<BusinessRow | null> => {
   return data ?? null;
 });
 
-const DEFAULT_SETTINGS: Omit<CostSettingsRow, 'business_id' | 'updated_at'> = {
+const DEFAULT_SETTINGS: Omit<CostSettingsRow, 'id' | 'business_id' | 'created_at' | 'updated_at'> = {
   labor_hourly_rate: 0,
+  gas_cost: 0,
+  electricity_cost: 0,
   default_margin_percent: 50,
   minimum_margin_percent: 0,
   variable_fees_percent: 0,
   indirect_method: 'none',
-  indirect_percent: 0,
+  indirect_cost_percentage: 0,
   indirect_monthly_amount: 0,
   indirect_monthly_units: 0,
   indirect_monthly_hours: 0,
@@ -78,7 +80,18 @@ export const getCostSettings = cache(async (businessId: string): Promise<CostSet
     .eq('business_id', businessId)
     .maybeSingle();
 
-  return data ?? { ...DEFAULT_SETTINGS, business_id: businessId, updated_at: new Date().toISOString() };
+  if (data) return data;
+
+  // Negócio sem configurações gravadas ainda: valores neutros, nunca undefined
+  // chegando ao motor de cálculo.
+  const agora = new Date().toISOString();
+  return {
+    ...DEFAULT_SETTINGS,
+    id: '',
+    business_id: businessId,
+    created_at: agora,
+    updated_at: agora,
+  };
 });
 
 /**

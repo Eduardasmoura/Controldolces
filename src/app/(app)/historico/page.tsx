@@ -107,7 +107,7 @@ export default async function HistoryPage() {
                         {formatCurrency(item.sale_price)}
                       </td>
                       <td className="px-3 py-3.5 text-right tabular-nums text-sand-600">
-                        {formatPercent(item.margin_percent)}
+                        {formatPercent(item.margin_percentage)}
                       </td>
                       <td className="px-3 py-3.5 text-right tabular-nums text-sand-600">
                         {formatMarkup(item.markup)}
@@ -172,7 +172,7 @@ export default async function HistoryPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium tabular-nums text-sand-800">
-                      {formatPercent(entry.margin_percent)}
+                      {formatPercent(entry.margin_percentage)}
                     </p>
                     <p className="text-xs text-sand-400">margem</p>
                   </div>

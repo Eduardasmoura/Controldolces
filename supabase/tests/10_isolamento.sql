@@ -50,10 +50,45 @@ select
   (select yield_quantity from public.products)      as rendimento;
 
 insert into public.pricing_calculations
-  (business_id, product_id, sale_price, unit_cost, batch_cost, minimum_price, recommended_price,
-   margin_percent, markup, profit_per_unit, yield_quantity, input_snapshot, breakdown)
-select b.id, :'produto_id', 6.14, 2.4535, 49.07, 2.46, 6.14, 60.0, 2.5026, 3.6865, 20, '{}', '{}'
+  (business_id, product_id, sale_price, unit_cost, total_cost, minimum_price, suggested_price,
+   margin_percentage, desired_margin, markup, profit_per_unit, profit_total, yield_quantity,
+   ingredient_cost, packaging_cost, labor_cost, input_snapshot, breakdown)
+select b.id, :'produto_id', 6.14, 2.4535, 49.07, 2.46, 6.14, 60.0, 60.0, 2.5026, 3.6865, 73.73, 20,
+       5.98, 12.00, 20.00, '{}', '{}'
 from public.businesses b;
+
+
+\echo '>>> ingredients.unit_cost e calculado pelo banco (1 kg por R$ 29,90):'
+select purchase_quantity, purchase_unit, purchase_price, unit_cost
+from public.ingredients;
+
+\echo '>>> unit_cost nao aceita escrita (coluna gerada):'
+do $$
+begin
+  begin
+    update public.ingredients set unit_cost = 999;
+    raise exception 'FALHA: unit_cost aceitou escrita direta';
+  exception
+    when generated_always then
+      raise notice 'OK: o banco recusou escrever numa coluna gerada';
+  end;
+end;
+$$;
+
+\echo '>>> unit_cost acompanha a mudanca de preco automaticamente:'
+update public.ingredients set purchase_price = 39.90;
+select purchase_price, unit_cost from public.ingredients;
+update public.ingredients set purchase_price = 29.90;
+
+\echo '>>> conversao entre unidades da mesma dimensao:'
+insert into public.ingredients (business_id, name, purchase_unit, purchase_quantity, purchase_price)
+select id, 'Leite condensado', 'g', 395, 6.99 from public.businesses;
+insert into public.ingredients (business_id, name, purchase_unit, purchase_quantity, purchase_price)
+select id, 'Leite', 'l', 1, 5.00 from public.businesses;
+insert into public.ingredients (business_id, name, purchase_unit, purchase_quantity, purchase_price)
+select id, 'Ovos', 'dz', 1, 12.00 from public.businesses;
+select name, purchase_quantity, purchase_unit, purchase_price, unit_cost
+from public.ingredients order by name;
 
 reset role;
 reset request.jwt.claim.sub;

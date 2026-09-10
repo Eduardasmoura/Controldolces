@@ -58,3 +58,12 @@ done
 echo
 echo "Executando testes..."
 run -f "$HERE/10_isolamento.sql"
+
+# O contrato do custo por unidade-base é gerado a partir dos casos compartilhados
+# com o teste do motor, para as duas implementações não divergirem em silêncio.
+if command -v node >/dev/null; then
+  node "$HERE/gerar-teste-unit-cost.mjs" > "$WORK/20_unit_cost.sql"
+  run -f "$WORK/20_unit_cost.sql"
+else
+  echo "AVISO: node nao encontrado; o contrato de unit_cost nao foi verificado."
+fi

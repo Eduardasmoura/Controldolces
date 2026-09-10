@@ -59,6 +59,12 @@ recursão de política e sequestro de schema.
 `pricing_calculations` guarda o preço atual de cada produto (um registro por
 produto, atualizado a cada gravação). `pricing_history` é append-only: recebe uma
 linha por precificação salva, com o retrato completo dos custos daquele momento.
+
+As duas tabelas guardam o custo **aberto por categoria** em colunas próprias
+(`ingredient_cost`, `packaging_cost`, `labor_cost`, `gas_cost`,
+`electricity_cost`, `other_cost`, `indirect_cost`, `total_cost`), além do
+`input_snapshot` em JSONB. As colunas tornam os relatórios consultáveis em SQL;
+o JSONB preserva a entrada exata do cálculo.
 Assim uma precificação de três meses atrás continua explicável mesmo depois de os
 ingredientes mudarem de preço — e a política de `update` é removida de propósito.
 

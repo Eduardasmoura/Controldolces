@@ -37,8 +37,10 @@ as migrações **na ordem**:
 1. `supabase/migrations/0001_schema.sql` — tabelas, tipos e triggers
 2. `supabase/migrations/0002_rls.sql` — políticas de isolamento e bucket de fotos
 3. `supabase/migrations/0003_save_product.sql` — gravação transacional da receita
+4. `supabase/migrations/0004_fase1_alinhamento.sql` — custo por unidade-base,
+   gás/energia do negócio e custo aberto por categoria nas precificações
 
-Com a CLI do Supabase, `supabase db push` aplica as três.
+Com a CLI do Supabase, `supabase db push` aplica todas.
 
 ### 3. Configurar as variáveis
 
@@ -74,7 +76,7 @@ npm run dev
 | `npm run build` | Build de produção |
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run lint` | ESLint |
-| `npm test` | Testes do motor de precificação (49 testes) |
+| `npm test` | Testes do motor de precificação (74 testes) |
 | `npm run test:db` | Testes de isolamento e transação num Postgres temporário |
 
 ## Estrutura

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CostSettingsRow, IngredientRow, ProductRow } from '@/lib/database.types';
-import { calculatePricing } from '@/lib/pricing';
+import { calculatePricing, costPerBaseUnit } from '@/lib/pricing';
 import type { ProductDetail } from '@/server/queries';
 
 import { buildPricingInput, effectiveMargin, indirectConfigFrom } from './pricing';
@@ -15,16 +15,20 @@ const AGORA = '2026-01-10T12:00:00.000Z';
 
 function settings(overrides: Partial<CostSettingsRow> = {}): CostSettingsRow {
   return {
+    id: 'settings-1',
     business_id: 'business-1',
     labor_hourly_rate: 25,
+    gas_cost: 0,
+    electricity_cost: 0,
     default_margin_percent: 50,
     minimum_margin_percent: 0,
     variable_fees_percent: 0,
     indirect_method: 'none',
-    indirect_percent: 0,
+    indirect_cost_percentage: 0,
     indirect_monthly_amount: 0,
     indirect_monthly_units: 0,
     indirect_monthly_hours: 0,
+    created_at: AGORA,
     updated_at: AGORA,
     ...overrides,
   };
@@ -40,6 +44,9 @@ function ingredient(overrides: Partial<IngredientRow> = {}): IngredientRow {
     purchase_unit: 'kg',
     purchase_quantity: 1,
     purchase_price: 29.9,
+    // Coluna gerada pelo banco; nos testes é preenchida com o mesmo valor que o
+    // Postgres calcularia, para o fixture refletir uma linha real.
+    unit_cost: 29.9 / 1000,
     archived_at: null,
     created_at: AGORA,
     updated_at: AGORA,
@@ -108,7 +115,7 @@ describe('rateio de custos indiretos a partir das configurações', () => {
   });
 
   it('lê cada método com os campos que lhe pertencem', () => {
-    expect(indirectConfigFrom(settings({ indirect_method: 'percent', indirect_percent: 12 }))).toEqual(
+    expect(indirectConfigFrom(settings({ indirect_method: 'percent', indirect_cost_percentage: 12 }))).toEqual(
       { method: 'percent', percent: 12 },
     );
 
@@ -193,7 +200,7 @@ describe('montagem da entrada de cálculo', () => {
     const comRateio = calculatePricing(
       buildPricingInput(
         detail(),
-        settings({ indirect_method: 'percent', indirect_percent: 10 }),
+        settings({ indirect_method: 'percent', indirect_cost_percentage: 10 }),
       ),
     );
 
@@ -209,5 +216,81 @@ describe('montagem da entrada de cálculo', () => {
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
     expect(outcome.issues.some((issue) => issue.field === 'ingredients')).toBe(true);
+  });
+});
+
+
+describe('gás e energia do negócio', () => {
+  it('entram como custo do lote quando o produto não declara os seus', () => {
+    const input = buildPricingInput(
+      detail({ extras: [] }),
+      settings({ gas_cost: 3, electricity_cost: 2 }),
+    );
+
+    const gas = input.extras.filter((extra) => extra.category === 'gas');
+    const energia = input.extras.filter((extra) => extra.category === 'energy');
+
+    expect(gas).toHaveLength(1);
+    expect(gas[0]).toMatchObject({ amount: 3, scope: 'batch' });
+    expect(energia).toHaveLength(1);
+    expect(energia[0]).toMatchObject({ amount: 2, scope: 'batch' });
+  });
+
+  it('o custo próprio do produto tem prioridade sobre a estimativa do negócio', () => {
+    const comGasProprio = detail({
+      extras: [
+        {
+          id: 'ex-gas',
+          product_id: 'prod-1',
+          business_id: 'business-1',
+          label: 'Gás do forno grande',
+          category: 'gas',
+          amount: 9,
+          scope: 'batch',
+          position: 0,
+          created_at: AGORA,
+        },
+      ],
+    });
+
+    const input = buildPricingInput(comGasProprio, settings({ gas_cost: 3, electricity_cost: 2 }));
+    const gas = input.extras.filter((extra) => extra.category === 'gas');
+
+    expect(gas).toHaveLength(1);
+    expect(gas[0]?.amount).toBe(9);
+    // A energia, que o produto não declarou, continua vindo do negócio.
+    expect(input.extras.filter((extra) => extra.category === 'energy')).toHaveLength(1);
+  });
+
+  it('estimativa zerada não vira custo fantasma', () => {
+    const input = buildPricingInput(detail({ extras: [] }), settings({ gas_cost: 0, electricity_cost: 0 }));
+    expect(input.extras).toHaveLength(0);
+  });
+
+  it('chegam ao custo final do lote', () => {
+    const outcome = calculatePricing(
+      buildPricingInput(detail({ extras: [] }), settings({ gas_cost: 3, electricity_cost: 2 })),
+    );
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.result.batch.gas).toBeCloseTo(3, 10);
+    expect(outcome.result.batch.energy).toBeCloseTo(2, 10);
+  });
+});
+
+describe('coerência entre o custo do banco e o do motor', () => {
+  it('ingredients.unit_cost e costPerBaseUnit calculam a mesma coisa', () => {
+    // unit_cost é uma coluna gerada no Postgres; costPerBaseUnit é a versão em
+    // TypeScript. As duas precisam concordar — este teste é o contrato entre elas.
+    const linha = ingredient({ purchase_unit: 'kg', purchase_quantity: 1, purchase_price: 29.9 });
+
+    const doMotor = costPerBaseUnit({
+      purchaseQuantity: linha.purchase_quantity,
+      purchaseUnit: linha.purchase_unit,
+      purchasePrice: linha.purchase_price,
+    });
+
+    expect(doMotor).toBeCloseTo(0.0299, 10);
+    expect(linha.unit_cost).toBeCloseTo(doMotor, 10);
   });
 });

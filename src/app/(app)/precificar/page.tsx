@@ -76,10 +76,10 @@ export default async function PricingIndexPage() {
                             {formatCurrency(preco.sale_price)}
                           </span>
                           <span className="block text-xs text-sand-400">
-                            margem {formatPercent(preco.margin_percent)}
+                            margem {formatPercent(preco.margin_percentage)}
                           </span>
                         </span>
-                        <Badge tone={preco.margin_percent < 20 ? 'warning' : 'success'}>
+                        <Badge tone={preco.margin_percentage < 20 ? 'warning' : 'success'}>
                           Precificado
                         </Badge>
                       </>

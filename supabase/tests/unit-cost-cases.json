@@ -1,0 +1,12 @@
+{
+  "descricao": "Casos de custo por unidade-base. Lidos pelo teste do motor (src/lib/pricing/unit-cost-contract.test.ts) e pelo teste de banco (supabase/tests/run.sh). As duas implementações — a coluna gerada no Postgres e costPerBaseUnit em TypeScript — precisam devolver o mesmo número.",
+  "casos": [
+    { "nome": "Chocolate em quilos",        "unidade": "kg", "quantidade": 1,    "preco": 29.90, "esperado": 0.0299 },
+    { "nome": "Leite condensado em gramas", "unidade": "g",  "quantidade": 395,  "preco": 6.99,  "esperado": 0.0176962025316456 },
+    { "nome": "Fermento em miligramas",     "unidade": "mg", "quantidade": 10000,"preco": 5.00,  "esperado": 0.5 },
+    { "nome": "Leite em litros",            "unidade": "l",  "quantidade": 1,    "preco": 5.00,  "esperado": 0.005 },
+    { "nome": "Essência em mililitros",     "unidade": "ml", "quantidade": 30,   "preco": 12.00, "esperado": 0.4 },
+    { "nome": "Forminha por unidade",       "unidade": "un", "quantidade": 100,  "preco": 8.00,  "esperado": 0.08 },
+    { "nome": "Ovos por dúzia",             "unidade": "dz", "quantidade": 1,    "preco": 12.00, "esperado": 1 }
+  ]
+}

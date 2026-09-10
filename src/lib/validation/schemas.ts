@@ -155,6 +155,11 @@ export const productSchema = z.object({
 export const costSettingsSchema = z
   .object({
     laborHourlyRate: numeroObrigatorio({ min: 0, mensagemMin: 'O valor da hora não pode ser negativo.' }),
+    gasCost: numeroObrigatorio({ min: 0, mensagemMin: 'O custo de gás não pode ser negativo.' }).default(0),
+    electricityCost: numeroObrigatorio({
+      min: 0,
+      mensagemMin: 'O custo de energia não pode ser negativo.',
+    }).default(0),
     defaultMarginPercent: numeroObrigatorio({ min: 0, max: 95 }),
     minimumMarginPercent: numeroObrigatorio({ min: 0, max: 95 }),
     variableFeesPercent: numeroObrigatorio({ min: 0, max: 99 }),

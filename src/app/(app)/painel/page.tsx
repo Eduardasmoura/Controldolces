@@ -63,7 +63,7 @@ export default async function DashboardPage() {
   const primeiroNome = (profile?.full_name || business.name).split(' ')[0] ?? '';
 
   // Métricas calculadas a partir das precificações realmente salvas.
-  const margens = pricings.map((item) => item.margin_percent);
+  const margens = pricings.map((item) => item.margin_percentage);
   const margemMedia = margens.length
     ? margens.reduce((total, value) => total + value, 0) / margens.length
     : null;
@@ -224,14 +224,14 @@ export default async function DashboardPage() {
 
                         <span className="text-right">
                           <span className="block text-sm font-medium tabular-nums text-sand-800">
-                            {formatPercent(item.margin_percent)}
+                            {formatPercent(item.margin_percentage)}
                           </span>
                           <span className="block text-xs text-sand-400">margem</span>
                         </span>
 
                         {abaixoDoMinimo ? (
                           <Badge tone="danger">Abaixo do mínimo</Badge>
-                        ) : item.margin_percent < 20 ? (
+                        ) : item.margin_percentage < 20 ? (
                           <Badge tone="warning">Margem baixa</Badge>
                         ) : (
                           <Badge tone="success">Saudável</Badge>

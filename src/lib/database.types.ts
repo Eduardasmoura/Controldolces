@@ -40,6 +40,8 @@ export type IngredientRow = Timestamps & {
   purchase_unit: MeasurementUnit;
   purchase_quantity: number;
   purchase_price: number;
+  /** Custo por grama, mililitro ou unidade. Coluna gerada: o banco calcula, a aplicação só lê. */
+  unit_cost: number;
   archived_at: string | null;
 };
 
@@ -101,16 +103,22 @@ export type ProductExtraCostRow = {
 };
 
 export type CostSettingsRow = {
+  id: string;
   business_id: string;
   labor_hourly_rate: number;
+  /** Estimativa de gás por produção, usada quando o produto não define a sua. */
+  gas_cost: number;
+  /** Estimativa de energia por produção, usada quando o produto não define a sua. */
+  electricity_cost: number;
   default_margin_percent: number;
   minimum_margin_percent: number;
   variable_fees_percent: number;
   indirect_method: IndirectCostMethodRow;
-  indirect_percent: number;
+  indirect_cost_percentage: number;
   indirect_monthly_amount: number;
   indirect_monthly_units: number;
   indirect_monthly_hours: number;
+  created_at: string;
   updated_at: string;
 };
 
@@ -120,13 +128,25 @@ export type PricingCalculationRow = Timestamps & {
   product_id: string;
   sale_price: number;
   unit_cost: number;
-  batch_cost: number;
   minimum_price: number;
-  recommended_price: number;
-  margin_percent: number;
+  suggested_price: number;
+  margin_percentage: number;
   markup: number;
   profit_per_unit: number;
   yield_quantity: number;
+  /** Custos do LOTE, abertos por categoria. */
+  ingredient_cost: number;
+  packaging_cost: number;
+  labor_cost: number;
+  gas_cost: number;
+  electricity_cost: number;
+  other_cost: number;
+  indirect_cost: number;
+  total_cost: number;
+  /** Margem pedida pela usuária, em %. */
+  desired_margin: number;
+  profit_total: number;
+
   input_snapshot: Json;
   breakdown: Json;
 };
@@ -139,11 +159,24 @@ export type PricingHistoryRow = {
   sale_price: number;
   unit_cost: number;
   minimum_price: number;
-  recommended_price: number;
-  margin_percent: number;
+  suggested_price: number;
+  margin_percentage: number;
   markup: number;
   profit_per_unit: number;
   yield_quantity: number;
+  /** Custos do LOTE, abertos por categoria. */
+  ingredient_cost: number;
+  packaging_cost: number;
+  labor_cost: number;
+  gas_cost: number;
+  electricity_cost: number;
+  other_cost: number;
+  indirect_cost: number;
+  total_cost: number;
+  /** Margem pedida pela usuária, em %. */
+  desired_margin: number;
+  profit_total: number;
+
   input_snapshot: Json;
   breakdown: Json;
   created_at: string;
@@ -182,6 +215,7 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       owned_business_ids: { Args: Record<string, never>; Returns: string[] };
+      unit_base_factor: { Args: { u: MeasurementUnit }; Returns: number };
       save_product: {
         Args: { p_product: Json; p_ingredients: Json; p_extras: Json };
         Returns: string;

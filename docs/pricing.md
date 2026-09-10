@@ -39,6 +39,12 @@ Cada custo adicional declara **onde incide**:
 Essa distinção não é detalhe: tratar embalagem como custo de lote divide o valor
 pelo rendimento e subestima o custo unitário em várias vezes.
 
+Gás e energia têm uma estimativa por produção no nível do negócio
+(`cost_settings.gas_cost` e `cost_settings.electricity_cost`). Ela entra no
+cálculo apenas quando o produto **não** declara um custo próprio daquela
+categoria: uma receita que ocupa o forno por duas horas merece um valor seu, e o
+padrão do negócio não deve competir com ele.
+
 Mão de obra é sempre um custo de lote:
 
 ```
@@ -111,6 +117,20 @@ que o arredondamento nunca empurre o preço abaixo do custo.
 
 Preço mínimo não significa "qualquer preço com lucro". É o limite: abaixo dele a
 venda tira dinheiro do caixa.
+
+## O custo do ingrediente existe em dois lugares
+
+`ingredients.unit_cost` é uma **coluna gerada** no Postgres: o banco calcula a
+partir do preço e da quantidade da própria linha, e recusa escrita. Serve para
+relatórios e consultas SQL diretas, sem precisar refazer a conta.
+
+`costPerBaseUnit`, em TypeScript, é o que o motor usa — é a via autoritativa da
+precificação.
+
+Duas implementações da mesma conversão poderiam divergir em silêncio, então elas
+são amarradas por um contrato: `supabase/tests/unit-cost-cases.json` lista os
+casos, o teste do motor confere o lado TypeScript e `npm run test:db` confere o
+lado do banco. Mexer em um sem mexer no outro quebra um dos dois.
 
 ## Precisão e arredondamento
 

@@ -87,7 +87,7 @@ export default async function ReportsPage() {
 
   const custoMedio = media(pricings.map((item) => item.unit_cost));
   const precoMedio = media(pricings.map((item) => item.sale_price));
-  const margemMedia = media(pricings.map((item) => item.margin_percent));
+  const margemMedia = media(pricings.map((item) => item.margin_percentage));
   const lucroPotencial = pricings.reduce(
     (total, item) => total + item.profit_per_unit * item.yield_quantity,
     0,
@@ -98,8 +98,8 @@ export default async function ReportsPage() {
     .slice(0, 5);
 
   const margemApertada = [...pricings]
-    .filter((item) => item.margin_percent < MARGEM_BAIXA)
-    .sort((a, b) => a.margin_percent - b.margin_percent);
+    .filter((item) => item.margin_percentage < MARGEM_BAIXA)
+    .sort((a, b) => a.margin_percentage - b.margin_percentage);
 
   const abaixoDoMinimo = pricings.filter((item) => item.sale_price < item.minimum_price);
 
@@ -169,7 +169,7 @@ export default async function ReportsPage() {
           <ListaDeProdutos
             items={margemApertada}
             vazio="Nenhum produto com margem apertada. Bom sinal."
-            destaque={(item) => formatPercent(item.margin_percent)}
+            destaque={(item) => formatPercent(item.margin_percentage)}
           />
         </Card>
 

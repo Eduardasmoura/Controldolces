@@ -1,6 +1,8 @@
 import type { CostSettingsRow } from '@/lib/database.types';
 import {
   calculatePricing,
+  type ExtraCostCategory,
+  type ExtraCostInput,
   type IndirectCostConfig,
   type PricingInput,
   type PricingOutcome,
@@ -20,7 +22,7 @@ import type { ProductDetail } from './queries';
 export function indirectConfigFrom(settings: CostSettingsRow): IndirectCostConfig {
   switch (settings.indirect_method) {
     case 'percent':
-      return { method: 'percent', percent: settings.indirect_percent };
+      return { method: 'percent', percent: settings.indirect_cost_percentage };
     case 'monthly_units':
       return {
         method: 'monthly_units',
@@ -49,6 +51,41 @@ export function effectiveMargin(
   return settings.default_margin_percent;
 }
 
+/**
+ * Gás e energia têm uma estimativa por produção no nível do negócio
+ * (`cost_settings`). Ela entra no cálculo apenas quando o produto NÃO declara um
+ * custo próprio daquela categoria — receita que assa duas horas merece um valor
+ * seu, e o padrão do negócio não deve competir com ele.
+ */
+function extrasComPadroesDoNegocio(
+  extras: ExtraCostInput[],
+  settings: CostSettingsRow,
+): ExtraCostInput[] {
+  const resultado = [...extras];
+  const temCategoria = (categoria: ExtraCostCategory) =>
+    extras.some((extra) => extra.category === categoria);
+
+  if (settings.gas_cost > 0 && !temCategoria('gas')) {
+    resultado.push({
+      label: 'Gás (estimativa do negócio)',
+      category: 'gas',
+      amount: settings.gas_cost,
+      scope: 'batch',
+    });
+  }
+
+  if (settings.electricity_cost > 0 && !temCategoria('energy')) {
+    resultado.push({
+      label: 'Energia (estimativa do negócio)',
+      category: 'energy',
+      amount: settings.electricity_cost,
+      scope: 'batch',
+    });
+  }
+
+  return resultado;
+}
+
 export function buildPricingInput(
   detail: ProductDetail,
   settings: CostSettingsRow,
@@ -71,13 +108,16 @@ export function buildPricingInput(
       product.labor_minutes > 0
         ? { hourlyRate: settings.labor_hourly_rate, minutes: product.labor_minutes }
         : undefined,
-    extras: extras.map((extra) => ({
-      id: extra.id,
-      label: extra.label,
-      category: extra.category,
-      amount: extra.amount,
-      scope: extra.scope,
-    })),
+    extras: extrasComPadroesDoNegocio(
+      extras.map((extra) => ({
+        id: extra.id,
+        label: extra.label,
+        category: extra.category,
+        amount: extra.amount,
+        scope: extra.scope,
+      })),
+      settings,
+    ),
     indirect: indirectConfigFrom(settings),
     desiredMarginPercent: effectiveMargin(detail, settings, marginOverride),
     variableFeesPercent: settings.variable_fees_percent,

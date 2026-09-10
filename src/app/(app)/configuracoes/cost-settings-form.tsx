@@ -12,6 +12,8 @@ import { IDLE } from '@/server/form-state';
 
 export type CostSettingsValues = {
   laborHourlyRate: string;
+  gasCost: string;
+  electricityCost: string;
   defaultMarginPercent: string;
   minimumMarginPercent: string;
   variableFeesPercent: string;
@@ -88,6 +90,26 @@ export function CostSettingsForm({ initial }: { initial: CostSettingsValues }) {
               defaultValue={initial.laborHourlyRate}
               hint="Quanto você quer receber por hora de produção."
               error={state.fieldErrors?.laborHourlyRate}
+            />
+
+            <TextField
+              label="Gás por produção"
+              name="gasCost"
+              inputMode="decimal"
+              prefix="R$"
+              defaultValue={initial.gasCost}
+              hint="Estimativa por fornada. Uma receita pode ter o próprio valor."
+              error={state.fieldErrors?.gasCost}
+            />
+
+            <TextField
+              label="Energia por produção"
+              name="electricityCost"
+              inputMode="decimal"
+              prefix="R$"
+              defaultValue={initial.electricityCost}
+              hint="Mesma ideia do gás: aproximado é melhor que ignorado."
+              error={state.fieldErrors?.electricityCost}
             />
 
             <TextField

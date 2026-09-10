@@ -41,11 +41,13 @@ export default async function SettingsPage() {
         <CostSettingsForm
           initial={{
             laborHourlyRate: String(settings.labor_hourly_rate),
+            gasCost: String(settings.gas_cost),
+            electricityCost: String(settings.electricity_cost),
             defaultMarginPercent: String(settings.default_margin_percent),
             minimumMarginPercent: String(settings.minimum_margin_percent),
             variableFeesPercent: String(settings.variable_fees_percent),
             indirectMethod: settings.indirect_method,
-            indirectPercent: String(settings.indirect_percent),
+            indirectPercent: String(settings.indirect_cost_percentage),
             indirectMonthlyAmount: String(settings.indirect_monthly_amount),
             indirectMonthlyUnits: String(settings.indirect_monthly_units),
             indirectMonthlyHours: String(settings.indirect_monthly_hours),

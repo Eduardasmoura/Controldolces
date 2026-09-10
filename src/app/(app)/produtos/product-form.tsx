@@ -49,6 +49,9 @@ export type ProductFormValues = {
 
 export type CostContext = {
   laborHourlyRate: number;
+  /** Estimativas do negócio, usadas quando o produto não tem custo próprio da categoria. */
+  gasCost: number;
+  electricityCost: number;
   defaultMarginPercent: number;
   minimumMarginPercent: number;
   variableFeesPercent: number;
